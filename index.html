@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PromptInvoice — Free Invoice Generator</title>
+  <meta name="description" content="Create professional invoices, quotes, estimates and receipts in seconds. Describe the job in plain words and let AI draft it. Free, no sign-up, everything stays in your browser.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23166534'/%3E%3Cpath d='M9 8h14v16H9z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M12 13h8M12 17h8M12 21h5' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="#top" aria-label="PromptInvoice home">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span>PromptInvoice</span>
+    </a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#tips">Tips</a>
+      <a href="#faq">FAQ</a>
+    </nav>
+    <div class="nav-actions">
+      <button type="button" class="link-btn" id="open-settings">Settings</button>
+      <button type="button" class="link-btn" id="open-auth">Sign in</button>
+      <span class="auth-user" id="auth-user" hidden><span id="auth-email"></span> <button type="button" class="link-btn" id="sign-out">Sign out</button></span>
+      <a class="btn btn-primary btn-sm" href="#generate">Create invoice</a>
+    </div>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="container">
+      <h1>Invoices that look<br><span class="accent">professional.</span></h1>
+      <p class="lede">Build a beautiful invoice, quote, estimate or receipt and download a polished PDF in seconds. Describe the job in plain words and let AI draft it for you. Sign in with your work email to share it with your team.</p>
+      <div class="hero-cta">
+        <a class="btn btn-primary" href="#generate">Create your invoice</a>
+        <a class="btn-link" href="#how">How it works ›</a>
+      </div>
+      <p class="trust">Free forever &nbsp;·&nbsp; No sign-up &nbsp;·&nbsp; Everything stays on your device</p>
+    </div>
+  </section>
+
+  <section class="generate" id="generate">
+    <div class="container">
+      <h2>Start now. It takes two minutes.</h2>
+      <p class="section-sub">Fill it in once — your businesses, clients and invoices are saved for next time. Or just describe the job and let AI draft it.</p>
+      <p class="workspace-note" id="workspace-note">Working locally in this browser. <button type="button" class="link-btn" id="workspace-signin">Sign in with your work email</button> to share businesses, clients and invoices with your team.</p>
+
+      <div class="generator">
+        <div class="form-card">
+
+          <!-- AI draft -->
+          <section class="ai-box">
+            <h3><span class="spark" aria-hidden="true">✦</span> Describe it. We'll draft it.</h3>
+            <p class="hint">Write what you did in plain words — items, prices, client, tax — and the invoice fills itself in.</p>
+            <textarea id="ai-prompt" rows="4" aria-label="Describe the work to draft your invoice" placeholder="e.g. Invoice Acme Corp for the September prototype: 24 hours of development at $120/hr, one headset at $650, 15% GST, payment due in 14 days."></textarea>
+            <div class="ai-actions">
+              <button type="button" class="btn btn-primary" id="ai-generate">Generate invoice</button>
+              <span class="hint" id="ai-status">⌘↩ to submit · review before sending</span>
+            </div>
+          </section>
+
+          <!-- Document type -->
+          <section class="fs">
+            <h3>Document type</h3>
+            <div class="seg" role="radiogroup" aria-label="Document type" id="doc-type">
+              <button type="button" data-doctype="invoice" class="active">Invoice</button>
+              <button type="button" data-doctype="quote">Quote</button>
+              <button type="button" data-doctype="estimate">Estimate</button>
+              <button type="button" data-doctype="receipt">Receipt</button>
+            </div>
+          </section>
+
+          <!-- From / Bill to -->
+          <section class="fs two-col">
+            <div>
+              <div class="col-head">
+                <h3>From</h3>
+                <div class="picker">
+                  <select id="profile-select" aria-label="Issuing business"></select>
+                  <button type="button" class="icon-btn" id="profile-new" title="New business">+</button>
+                  <button type="button" class="icon-btn" id="profile-delete" title="Delete business">×</button>
+                </div>
+              </div>
+              <label>Business name<input type="text" data-bind="from.name" placeholder="Studio Nova Ltd"></label>
+              <label>Email<input type="email" data-bind="from.email" placeholder="billing@studionova.com"></label>
+              <label>Phone<input type="text" data-bind="from.phone" placeholder="+64 21 000 0000"></label>
+              <label>Address<textarea data-bind="from.address" rows="2" placeholder="12 Example Street&#10;Auckland 1010, New Zealand"></textarea></label>
+              <div class="row">
+                <label>Tax / GST number<input type="text" data-bind="from.taxId" placeholder="123-456-789"></label>
+                <label>Number prefix<input type="text" data-bind="from.prefix" placeholder="INV"></label>
+              </div>
+              <label>Logo (optional)
+                <div class="logo-row">
+                  <input type="file" id="logo-file" accept="image/*" hidden>
+                  <button type="button" class="btn btn-ghost btn-sm" id="logo-upload">Upload image</button>
+                  <button type="button" class="link-btn" id="logo-remove" hidden>Remove</button>
+                  <img id="logo-thumb" alt="" hidden>
+                </div>
+              </label>
+              <button type="button" class="btn btn-ghost btn-sm" id="profile-save">Save business details</button>
+            </div>
+            <div>
+              <div class="col-head">
+                <h3>Bill to</h3>
+                <div class="picker">
+                  <select id="client-select" aria-label="Saved clients"><option value="">Saved clients…</option></select>
+                  <button type="button" class="icon-btn" id="client-delete" title="Delete client">×</button>
+                </div>
+              </div>
+              <label>Client name<input type="text" data-bind="to.name" placeholder="Acme Inc."></label>
+              <label>Email<input type="email" data-bind="to.email" placeholder="ap@acme.com"></label>
+              <label>Address<textarea data-bind="to.address" rows="2" placeholder="456 Broadway&#10;New York, NY 10013"></textarea></label>
+              <label>Reference / PO number<input type="text" data-bind="to.reference" placeholder="PO-2026-014"></label>
+              <button type="button" class="btn btn-ghost btn-sm" id="client-save">Save client</button>
+            </div>
+          </section>
+
+          <!-- Items -->
+          <section class="fs">
+            <div class="col-head">
+              <h3>Items</h3>
+              <button type="button" class="link-btn" id="item-add">+ Add item</button>
+            </div>
+            <div class="items-head">
+              <span>Description</span><span>Qty</span><span>Rate</span><span>Amount</span><span></span>
+            </div>
+            <div id="items"></div>
+          </section>
+
+          <!-- Numbers -->
+          <section class="fs two-col">
+            <div>
+              <label>Currency<select data-bind="currency" id="currency-select"></select></label>
+              <div class="row">
+                <label>Tax %<input type="number" step="any" min="0" data-bind="taxRate"></label>
+                <label>Tax label<input type="text" data-bind="taxLabel" placeholder="GST"></label>
+              </div>
+              <label>Discount
+                <div class="row tight">
+                  <select data-bind="discountType" aria-label="Discount type"><option value="percent">%</option><option value="fixed">Amount</option></select>
+                  <input type="number" step="any" min="0" data-bind="discountValue">
+                </div>
+              </label>
+              <label>Shipping<input type="number" step="any" min="0" data-bind="shipping" placeholder="0.00"></label>
+            </div>
+            <div>
+              <label><span id="number-label">Invoice number</span><input type="text" data-bind="number"></label>
+              <div class="row">
+                <label>Issue date<input type="date" data-bind="issueDate"></label>
+                <label><span id="due-label">Due date</span><input type="date" data-bind="dueDate"></label>
+              </div>
+              <label>Payment terms
+                <select id="terms-select" aria-label="Payment terms">
+                  <option value="">Custom</option>
+                  <option value="0">Due on receipt</option>
+                  <option value="7">Net 7</option>
+                  <option value="14">Net 14</option>
+                  <option value="30">Net 30</option>
+                  <option value="45">Net 45</option>
+                  <option value="60">Net 60</option>
+                </select>
+              </label>
+              <label>Theme
+                <div class="themes" id="themes">
+                  <button type="button" data-theme="#166534" aria-label="Forest green" style="--c:#166534"></button>
+                  <button type="button" data-theme="#1e3a8a" aria-label="Navy" style="--c:#1e3a8a"></button>
+                  <button type="button" data-theme="#1d1d1f" aria-label="Charcoal" style="--c:#1d1d1f"></button>
+                  <button type="button" data-theme="#b45309" aria-label="Amber" style="--c:#b45309"></button>
+                  <button type="button" data-theme="#7c3aed" aria-label="Violet" style="--c:#7c3aed"></button>
+                  <button type="button" data-theme="#0e7490" aria-label="Teal" style="--c:#0e7490"></button>
+                </div>
+              </label>
+            </div>
+          </section>
+
+          <!-- Custom fields -->
+          <section class="fs">
+            <div class="col-head">
+              <h3>Custom fields</h3>
+              <button type="button" class="link-btn" id="field-add">+ Add field</button>
+            </div>
+            <p class="hint">Project references, contract numbers, or any extra detail that appears on the invoice.</p>
+            <div id="custom-fields"></div>
+          </section>
+
+          <!-- Payment + notes -->
+          <section class="fs two-col">
+            <label>Payment details<textarea data-bind="paymentDetails" rows="4" placeholder="Bank: Example Bank&#10;Account name: Studio Nova Ltd&#10;Account no: 01-0000-0000000-00&#10;Reference: invoice number"></textarea></label>
+            <label>Notes &amp; terms<textarea data-bind="notes" rows="4" placeholder="Payment due within 14 days. Thank you for your business!"></textarea></label>
+          </section>
+
+          <p class="hint autosave" id="autosave-note">Everything is saved automatically in your browser. Nothing leaves your device unless you sign in or use AI drafting.</p>
+        </div>
+
+        <aside class="preview-col">
+          <div class="paper-wrap">
+            <div class="paper" id="paper"></div>
+          </div>
+          <div class="preview-actions">
+            <button type="button" class="btn btn-primary" id="download-pdf">Download PDF</button>
+            <button type="button" class="btn btn-ghost" id="print">Print</button>
+            <button type="button" class="btn btn-ghost" id="save-invoice">Save</button>
+            <button type="button" class="btn btn-ghost" id="new-invoice">New</button>
+          </div>
+          <p class="hint center">Download PDF opens your browser's print dialog — choose “Save as PDF”.</p>
+
+          <div class="saved">
+            <div class="col-head">
+              <h3>Saved invoices</h3>
+              <div class="picker">
+                <button type="button" class="link-btn" id="export-backup">Export backup</button>
+                <input type="file" id="import-file" accept="application/json" hidden>
+                <button type="button" class="link-btn" id="import-backup">Import</button>
+              </div>
+            </div>
+            <div id="saved-list" class="saved-list"></div>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <section class="features" id="features">
+    <div class="container">
+      <h2>Everything you need.<br><span class="muted">Nothing you don't.</span></h2>
+      <div class="grid-4">
+        <div class="feature">
+          <div class="ico">▤</div>
+          <h3>Polished PDFs</h3>
+          <p>Pixel-perfect A4 invoices that make your work look premium. Download and email to any client.</p>
+        </div>
+        <div class="feature">
+          <div class="ico">◎</div>
+          <h3>Many businesses, one place</h3>
+          <p>Keep every business you invoice from as its own profile with its own numbering, logo and bank details. Sign in to share them with your team.</p>
+        </div>
+        <div class="feature">
+          <div class="ico">$</div>
+          <h3>Any currency</h3>
+          <p>Bill in any of 150+ currencies with automatic tax, discount and shipping math built in.</p>
+        </div>
+        <div class="feature">
+          <div class="ico">✦</div>
+          <h3>Just describe it</h3>
+          <p>Type what you did in plain words — AI turns it into a finished invoice, items and totals included.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <div class="container">
+      <h2>Three steps. Done.</h2>
+      <div class="grid-3">
+        <div class="step"><div class="num">01</div><h3>Add your details</h3><p>Your business, logo and client info. Saved as profiles for next time.</p></div>
+        <div class="step"><div class="num">02</div><h3>Describe the work</h3><p>Line items, quantities, rates, tax — totals update live as you type. Or let AI draft it.</p></div>
+        <div class="step"><div class="num">03</div><h3>Download &amp; send</h3><p>One click gives you a crisp A4 PDF. Attach it, send it, get paid.</p></div>
+      </div>
+      <a class="btn btn-primary" href="#generate">Create your invoice</a>
+    </div>
+  </section>
+
+  <section class="tips" id="tips">
+    <div class="container">
+      <h2>What makes a good invoice?</h2>
+      <div class="grid-3">
+        <div class="tip"><h3>Clear line items</h3><p>Each service or product is listed separately with a description, quantity and price. No vague bundles.</p></div>
+        <div class="tip"><h3>Professional layout</h3><p>Clean typography, proper spacing and your logo. It signals credibility and attention to detail.</p></div>
+        <div class="tip"><h3>Payment terms upfront</h3><p>Net 15 or Net 30 — state when payment is due. Include your preferred method and any late fees.</p></div>
+        <div class="tip"><h3>Correct tax</h3><p>Apply the right rate for your jurisdiction. The total is calculated automatically.</p></div>
+        <div class="tip"><h3>Unique invoice number</h3><p>Sequential IDs per business (INV-001, INV-002) help you and your client track payments without confusion.</p></div>
+        <div class="tip"><h3>Contact info</h3><p>Your name, email and address — so the client knows exactly who to pay and how to reach you.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="faq" id="faq">
+    <div class="container narrow">
+      <h2>Questions. Answered.</h2>
+      <details><summary>Is it really free?</summary><p>Yes. Create, preview and download unlimited invoices. No trials, no paywalls, no watermarks.</p></details>
+      <details><summary>Do I need an account?</summary><p>No. Open the page, fill in your details and download your invoice.</p></details>
+      <details><summary>Where is my data stored?</summary><p>Everything you type is saved locally in your browser only. Use “Export backup” to move it to another machine or share a starting point with a colleague.</p></details>
+      <details><summary>How does AI drafting work?</summary><p>Paste your own Anthropic API key in Settings. The description you type is sent to Claude, which returns line items, client details, tax and terms that fill the form. Nothing else leaves your device.</p></details>
+      <details><summary>How does sign-in work?</summary><p>Enter your work email and we send a one-time sign-in link — no password. Everyone who signs in with the same email domain (say, @yourcompany.com) lands in the same workspace and shares its businesses, clients and invoices. Personal addresses like Gmail get a private workspace.</p></details>
+      <details><summary>Can I move my local data into the team workspace?</summary><p>Yes. The first time you sign in to an empty workspace, the app offers to copy what is saved in this browser. You can also use Export backup and Import at any time.</p></details>
+      <details><summary>Can I invoice from more than one business?</summary><p>Yes. Each business is a profile with its own name, logo, address, bank details and invoice numbering. Switch with the dropdown under “From”.</p></details>
+      <details><summary>Can I use it for quotes or receipts?</summary><p>Yes. Pick Quote, Estimate or Receipt as the document type and the labels change accordingly.</p></details>
+      <details><summary>What do I get when I download?</summary><p>A clean A4 PDF with your logo, line items, tax breakdown and payment details. Download opens the print dialog — choose “Save as PDF”.</p></details>
+      <details><summary>Does it calculate tax automatically?</summary><p>Yes. Enter your rate (GST, VAT, sales tax) and the total updates live. Discounts apply before tax; shipping is added after.</p></details>
+    </div>
+  </section>
+
+</main>
+
+<footer class="footer">
+  <div class="container footer-inner">
+    <div>
+      <a class="brand" href="#top"><span class="brand-mark" aria-hidden="true"></span><span>PromptInvoice</span></a>
+      <p class="hint">Free invoice generator for freelancers and small businesses. Everything stays in your browser.</p>
+    </div>
+    <nav class="footer-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+      <a href="https://www.invoala.com/" rel="noopener" target="_blank">Inspired by Invoala</a>
+    </nav>
+  </div>
+</footer>
+
+<!-- Sign-in modal -->
+<div class="modal" id="auth-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="auth-title">
+    <h3 id="auth-title">Sign in with your work email</h3>
+    <div id="auth-form">
+      <label>Email
+        <input type="email" id="auth-email-input" placeholder="you@yourcompany.com" autocomplete="email">
+      </label>
+      <p class="hint">We'll email you a one-time sign-in link. Everyone at your email domain shares one workspace, so your team sees the same businesses, clients and invoices.</p>
+      <p class="hint error" id="auth-error" hidden></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-ghost" id="auth-cancel">Cancel</button>
+        <button type="button" class="btn btn-primary" id="auth-send">Send sign-in link</button>
+      </div>
+    </div>
+    <div id="auth-sent" hidden>
+      <p>Check your inbox — we sent a sign-in link to <strong id="auth-sent-email"></strong>. Open it on this device to finish signing in.</p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-primary" id="auth-done">Done</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Settings modal -->
+<div class="modal" id="settings-modal" hidden>
+  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+    <h3 id="settings-title">Settings</h3>
+    <label>Anthropic API key
+      <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off">
+    </label>
+    <p class="hint">Stored only in this browser. Used for the “Describe it” drafting feature. Get one at console.anthropic.com.</p>
+    <label>Model
+      <select id="api-model">
+        <option value="claude-opus-5">Claude Opus 5 (default)</option>
+        <option value="claude-sonnet-5">Claude Sonnet 5 (faster, cheaper)</option>
+        <option value="claude-haiku-4-5">Claude Haiku 4.5 (cheapest)</option>
+      </select>
+    </label>
+    <div class="modal-actions">
+      <button type="button" class="btn btn-ghost" id="settings-cancel">Cancel</button>
+      <button type="button" class="btn btn-primary" id="settings-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+
+<script src="js/config.js"></script>
+<script src="js/currencies.js"></script>
+<script src="js/calc.js"></script>
+<script src="js/storage.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/auth.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

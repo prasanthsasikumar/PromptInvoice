@@ -1,0 +1,14 @@
+{
+  "name": "promptinvoice",
+  "version": "1.0.0",
+  "description": "Free, local-first invoice generator with AI drafting. Static site, no build step.",
+  "private": true,
+  "scripts": {
+    "start": "python3 -m http.server 8080",
+    "test": "node --test tests/calc.test.js",
+    "test:browser": "node --test tests/browser.test.mjs",
+    "test:all": "node --test tests/calc.test.js tests/browser.test.mjs",
+    "screenshots": "node tests/screenshots.mjs"
+  },
+  "license": "MIT"
+}
