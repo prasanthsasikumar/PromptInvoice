@@ -2,7 +2,7 @@
 
 **Free invoice generator with AI drafting and shared team workspaces. No build step, no accounts required, your data stays in your browser unless you choose to sign in.**
 
-Live: **https://prasanthsasikumar.github.io/PromptInvoice/**
+Live: **https://invoice.flowsxr.com/**
 
 ![PromptInvoice hero](docs/screenshots/hero.png)
 
@@ -27,7 +27,7 @@ I built this for my own invoicing across a couple of businesses and it turned ou
 
 ## Use it
 
-Open the [live site](https://prasanthsasikumar.github.io/PromptInvoice/), or run it locally:
+Open the [live site](https://invoice.flowsxr.com/), or run it locally:
 
 ```bash
 git clone https://github.com/prasanthsasikumar/PromptInvoice.git
@@ -57,7 +57,7 @@ Sign-in is optional and runs on a free [Supabase](https://supabase.com/) project
 
 1. Create a Supabase project. In **Authentication → Providers** make sure *Email* is enabled (magic links are on by default).
 2. Open **SQL Editor**, paste the contents of [`supabase/schema.sql`](supabase/schema.sql), and run it. This creates the tables, the per-domain workspace function, and row-level-security policies so each workspace can only see its own rows.
-3. In **Authentication → URL Configuration**, set *Site URL* to where you host the app (for GitHub Pages: `https://<you>.github.io/PromptInvoice/`) and add it to *Redirect URLs*.
+3. In **Authentication → URL Configuration**, set *Site URL* to where you host the app (for this deployment: `https://invoice.flowsxr.com/`) and add it to *Redirect URLs*.
 4. Copy the project URL and the `anon` public key from **Project Settings → API** into [`js/config.js`](js/config.js). The anon key is designed to be public; the SQL policies do the protecting.
 5. Deploy. The **Sign in** button appears in the nav.
 
