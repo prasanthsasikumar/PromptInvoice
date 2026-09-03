@@ -2,3 +2,5 @@ tests/.chrome-profile/
 tests/.chrome-profile-shots/
 node_modules/
 .DS_Store
+.vercel
+.env*
