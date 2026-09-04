@@ -37,11 +37,11 @@ npm start        # serves on http://localhost:8080 (plain python http.server)
 
 There is no build. `index.html` plus `css/` and `js/` is the whole app. You can also just double-click `index.html`.
 
-1. **From** — fill in your business and click *Save business details*. Add more businesses with the **+** next to the picker.
-2. **Bill to** — type the client or pick a saved one. *Save client* adds it to the client book.
-3. **Items** — description, qty, rate. Totals, tax, discount and shipping update live.
-4. **Download PDF** — opens the browser print dialog. Choose *Save as PDF*.
-5. **Save** — keeps the invoice in *Saved invoices* and bumps the business's counter.
+1. **From**: fill in your business and click *Save business details*. Add more businesses with the **+** next to the picker.
+2. **Bill to**: type the client or pick a saved one. *Save client* adds it to the client book.
+3. **Items**: description, qty, rate. Totals, tax, discount and shipping update live.
+4. **Download PDF**: opens the browser print dialog. Choose *Save as PDF*.
+5. **Save**: keeps the invoice in *Saved invoices* and bumps the business's counter.
 
 ### AI drafting
 

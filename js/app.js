@@ -163,7 +163,7 @@
     const sel = $('#currency-select');
     const popular = ['USD', 'EUR', 'GBP', 'NZD', 'AUD', 'CAD', 'SGD', 'INR', 'JPY'];
     const opts = function (list) {
-      return list.map(function (c) { return '<option value="' + c.code + '">' + c.code + ' — ' + esc(c.name) + '</option>'; }).join('');
+      return list.map(function (c) { return '<option value="' + c.code + '">' + c.code + ' · ' + esc(c.name) + '</option>'; }).join('');
     };
     const pop = popular.map(function (code) { return Calc.currencyInfo(code); }).filter(Boolean);
     sel.innerHTML = '<optgroup label="Popular">' + opts(pop) + '</optgroup><optgroup label="All currencies">' + opts(CURRENCIES) + '</optgroup>';
@@ -333,7 +333,7 @@
       applyDraft(d);
       renderAll();
       changed();
-      status.textContent = 'Drafted — review before sending.';
+      status.textContent = 'Drafted. Review before sending.';
       toast('Invoice drafted');
     } catch (e) {
       status.textContent = e.message || 'Something went wrong.';
@@ -436,12 +436,13 @@
     const note = $('#workspace-note');
     $('#open-auth').hidden = !!user || !Auth.configured();
     $('#auth-user').hidden = !user;
+    document.body.classList.toggle('signed-in', !!user);   // signed in: skip the pitch, open on the form
     if (user) {
       $('#auth-email').textContent = user.email;
       const shared = company && company.key.indexOf('@') === -1;
       note.classList.add('cloud');
       note.innerHTML = 'Signed in as <strong>' + esc(user.email) + '</strong> · Workspace <strong>' + esc(company ? company.name : '') + '</strong>' +
-        (shared ? ' — shared with everyone at @' + esc(company.key) : ' — private to you') + '.';
+        (shared ? ', shared with everyone at @' + esc(company.key) : ', private to you') + '.';
       $('#autosave-note').textContent = 'Businesses, clients and saved invoices sync to your workspace. The draft you are editing stays in this browser until you save it.';
     } else {
       note.classList.remove('cloud');
@@ -472,7 +473,7 @@
     Store.detachRemote();
     reloadWorkspace();
     renderAuthUI();
-    toast('Signed out — back to local mode');
+    toast('Signed out. Back to local mode');
   }
 
   function openAuth() {
@@ -591,7 +592,7 @@
     $('#logo-upload').addEventListener('click', function () { $('#logo-file').click(); });
     $('#logo-file').addEventListener('change', function () {
       const file = this.files[0]; if (!file) return;
-      if (file.size > 1.5 * 1024 * 1024) { toast('Logo too large — keep it under 1.5 MB', 3000); return; }
+      if (file.size > 1.5 * 1024 * 1024) { toast('Logo too large. Keep it under 1.5 MB', 3000); return; }
       const reader = new FileReader();
       reader.onload = function () { doc.from.logo = reader.result; renderLogo(); changed(); };
       reader.readAsDataURL(file);
@@ -609,7 +610,7 @@
       renderProfileSelect();
       $('#profile-select').value = p.id;
       applyProfile(p); renderAll(); changed();
-      toast('Business "' + p.name + '" created — fill in the details and save');
+      toast('Business "' + p.name + '" created. Fill in the details and save');
     });
     $('#profile-delete').addEventListener('click', function () {
       const p = currentProfile(); if (!p) return;
@@ -648,7 +649,7 @@
     // Actions
     $('#download-pdf').addEventListener('click', function () { document.title = doc.number + ' - ' + (doc.to.name || 'invoice'); window.print(); });
     $('#print').addEventListener('click', function () { document.title = doc.number + ' - ' + (doc.to.name || 'invoice'); window.print(); });
-    window.addEventListener('afterprint', function () { document.title = 'PromptInvoice — Free Invoice Generator'; });
+    window.addEventListener('afterprint', function () { document.title = 'PromptInvoice: Free Invoice Generator'; });
     $('#save-invoice').addEventListener('click', saveInvoice);
     $('#new-invoice').addEventListener('click', startNew);
 

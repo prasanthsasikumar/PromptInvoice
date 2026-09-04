@@ -31,7 +31,7 @@ const draft = {
   from: { profileId: 'p1', name: sample.profiles[0].name, email: sample.profiles[0].email, phone: sample.profiles[0].phone, address: sample.profiles[0].address, taxId: sample.profiles[0].taxId, prefix: 'SN', logo: '' },
   to: { clientId: 'c1', name: 'Acme Corp', email: 'ap@acme.com', address: '456 Broadway\nNew York, NY 10013', reference: 'PO-2026-014' },
   items: [
-    { description: 'Mixed-reality prototype — Unity development', qty: 24, rate: 120 },
+    { description: 'Mixed-reality prototype: Unity development', qty: 24, rate: 120 },
     { description: 'Meta Quest 3 headset (supplied)', qty: 1, rate: 650 },
     { description: 'On-site user testing session', qty: 2, rate: 450 },
   ],

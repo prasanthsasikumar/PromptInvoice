@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>PromptInvoice — Free Invoice Generator</title>
+  <title>PromptInvoice: Free Invoice Generator</title>
   <meta name="description" content="Create professional invoices, quotes, estimates and receipts in seconds. Describe the job in plain words and let AI draft it. Free, no sign-up, everything stays in your browser.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23166534'/%3E%3Cpath d='M9 8h14v16H9z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M12 13h8M12 17h8M12 21h5' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/styles.css">
@@ -47,7 +47,7 @@
   <section class="generate" id="generate">
     <div class="container">
       <h2>Start now. It takes two minutes.</h2>
-      <p class="section-sub">Fill it in once — your businesses, clients and invoices are saved for next time. Or just describe the job and let AI draft it.</p>
+      <p class="section-sub">Fill it in once. Your businesses, clients and invoices are saved for next time. Or just describe the job and let AI draft it.</p>
       <p class="workspace-note" id="workspace-note">Working locally in this browser. <button type="button" class="link-btn" id="workspace-signin">Sign in with your work email</button> to share businesses, clients and invoices with your team.</p>
 
       <div class="generator">
@@ -56,7 +56,7 @@
           <!-- AI draft -->
           <section class="ai-box">
             <h3><span class="spark" aria-hidden="true">✦</span> Describe it. We'll draft it.</h3>
-            <p class="hint">Write what you did in plain words — items, prices, client, tax — and the invoice fills itself in.</p>
+            <p class="hint">Write what you did in plain words (items, prices, client, tax) and the invoice fills itself in.</p>
             <textarea id="ai-prompt" rows="4" aria-label="Describe the work to draft your invoice" placeholder="e.g. Invoice Acme Corp for the September prototype: 24 hours of development at $120/hr, one headset at $650, 15% GST, payment due in 14 days."></textarea>
             <div class="ai-actions">
               <button type="button" class="btn btn-primary" id="ai-generate">Generate invoice</button>
@@ -150,7 +150,7 @@
             </div>
             <div>
               <label><span id="number-label">Invoice number</span><input type="text" data-bind="number"></label>
-              <div class="row">
+              <div class="row dates">
                 <label>Issue date<input type="date" data-bind="issueDate"></label>
                 <label><span id="due-label">Due date</span><input type="date" data-bind="dueDate"></label>
               </div>
@@ -207,7 +207,7 @@
             <button type="button" class="btn btn-ghost" id="save-invoice">Save</button>
             <button type="button" class="btn btn-ghost" id="new-invoice">New</button>
           </div>
-          <p class="hint center">Download PDF opens your browser's print dialog — choose “Save as PDF”.</p>
+          <p class="hint center">Download PDF opens your browser's print dialog. Choose “Save as PDF”.</p>
 
           <div class="saved">
             <div class="col-head">
@@ -247,7 +247,7 @@
         <div class="feature">
           <div class="ico">✦</div>
           <h3>Just describe it</h3>
-          <p>Type what you did in plain words — AI turns it into a finished invoice, items and totals included.</p>
+          <p>Type what you did in plain words. AI turns it into a finished invoice, items and totals included.</p>
         </div>
       </div>
     </div>
@@ -258,7 +258,7 @@
       <h2>Three steps. Done.</h2>
       <div class="grid-3">
         <div class="step"><div class="num">01</div><h3>Add your details</h3><p>Your business, logo and client info. Saved as profiles for next time.</p></div>
-        <div class="step"><div class="num">02</div><h3>Describe the work</h3><p>Line items, quantities, rates, tax — totals update live as you type. Or let AI draft it.</p></div>
+        <div class="step"><div class="num">02</div><h3>Describe the work</h3><p>Line items, quantities, rates, tax. Totals update live as you type. Or let AI draft it.</p></div>
         <div class="step"><div class="num">03</div><h3>Download &amp; send</h3><p>One click gives you a crisp A4 PDF. Attach it, send it, get paid.</p></div>
       </div>
       <a class="btn btn-primary" href="#generate">Create your invoice</a>
@@ -271,10 +271,10 @@
       <div class="grid-3">
         <div class="tip"><h3>Clear line items</h3><p>Each service or product is listed separately with a description, quantity and price. No vague bundles.</p></div>
         <div class="tip"><h3>Professional layout</h3><p>Clean typography, proper spacing and your logo. It signals credibility and attention to detail.</p></div>
-        <div class="tip"><h3>Payment terms upfront</h3><p>Net 15 or Net 30 — state when payment is due. Include your preferred method and any late fees.</p></div>
+        <div class="tip"><h3>Payment terms upfront</h3><p>Net 15 or Net 30: state when payment is due. Include your preferred method and any late fees.</p></div>
         <div class="tip"><h3>Correct tax</h3><p>Apply the right rate for your jurisdiction. The total is calculated automatically.</p></div>
         <div class="tip"><h3>Unique invoice number</h3><p>Sequential IDs per business (INV-001, INV-002) help you and your client track payments without confusion.</p></div>
-        <div class="tip"><h3>Contact info</h3><p>Your name, email and address — so the client knows exactly who to pay and how to reach you.</p></div>
+        <div class="tip"><h3>Contact info</h3><p>Your name, email and address, so the client knows exactly who to pay and how to reach you.</p></div>
       </div>
     </div>
   </section>
@@ -286,11 +286,11 @@
       <details><summary>Do I need an account?</summary><p>No. Open the page, fill in your details and download your invoice.</p></details>
       <details><summary>Where is my data stored?</summary><p>Everything you type is saved locally in your browser only. Use “Export backup” to move it to another machine or share a starting point with a colleague.</p></details>
       <details><summary>How does AI drafting work?</summary><p>The description you type is sent to this site's drafting endpoint, which asks DeepSeek to turn it into line items, client details, tax and terms that fill the form. No key or setup needed. Nothing else leaves your device.</p></details>
-      <details><summary>How does sign-in work?</summary><p>Enter your work email and we send a one-time sign-in link — no password. Everyone who signs in with the same email domain (say, @yourcompany.com) lands in the same workspace and shares its businesses, clients and invoices. Personal addresses like Gmail get a private workspace.</p></details>
+      <details><summary>How does sign-in work?</summary><p>Enter your work email and we send a one-time sign-in link, no password. Everyone who signs in with the same email domain (say, @yourcompany.com) lands in the same workspace and shares its businesses, clients and invoices. Personal addresses like Gmail get a private workspace.</p></details>
       <details><summary>Can I move my local data into the team workspace?</summary><p>Yes. The first time you sign in to an empty workspace, the app offers to copy what is saved in this browser. You can also use Export backup and Import at any time.</p></details>
       <details><summary>Can I invoice from more than one business?</summary><p>Yes. Each business is a profile with its own name, logo, address, bank details and invoice numbering. Switch with the dropdown under “From”.</p></details>
       <details><summary>Can I use it for quotes or receipts?</summary><p>Yes. Pick Quote, Estimate or Receipt as the document type and the labels change accordingly.</p></details>
-      <details><summary>What do I get when I download?</summary><p>A clean A4 PDF with your logo, line items, tax breakdown and payment details. Download opens the print dialog — choose “Save as PDF”.</p></details>
+      <details><summary>What do I get when I download?</summary><p>A clean A4 PDF with your logo, line items, tax breakdown and payment details. Download opens the print dialog. Choose “Save as PDF”.</p></details>
       <details><summary>Does it calculate tax automatically?</summary><p>Yes. Enter your rate (GST, VAT, sales tax) and the total updates live. Discounts apply before tax; shipping is added after.</p></details>
     </div>
   </section>
@@ -327,7 +327,7 @@
       </div>
     </div>
     <div id="auth-sent" hidden>
-      <p>Check your inbox — we sent a sign-in link to <strong id="auth-sent-email"></strong>. Open it on this device to finish signing in.</p>
+      <p>Check your inbox. We sent a sign-in link to <strong id="auth-sent-email"></strong>. Open it on this device to finish signing in.</p>
       <div class="modal-actions">
         <button type="button" class="btn btn-primary" id="auth-done">Done</button>
       </div>

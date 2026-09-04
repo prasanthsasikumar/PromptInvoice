@@ -199,3 +199,27 @@ test('cloud mode: attaching a remote workspace swaps data and mirrors writes', a
   await evalJs('Store.detachRemote(); true');
   assert.deepEqual(await evalJs(`Store.profiles().map(p => p.name)`), ['My business', 'Aisee']);
 });
+
+test('signed in: hero and intro are hidden so the page opens on the form', async () => {
+  assert.equal(await evalJs(`getComputedStyle(document.querySelector('.hero')).display !== 'none'`), true);
+  assert.equal(await evalJs(`document.body.classList.contains('signed-in')`), false);
+  // Fake a signed-in session: intercept Auth before app.js calls Auth.init and fire onSignIn straight away.
+  const { identifier } = await send('Page.addScriptToEvaluateOnNewDocument', { source: `
+    window.confirm = () => false;
+    let real;
+    Object.defineProperty(window, 'Auth', { configurable: true, get: () => real, set: (v) => {
+      real = v;
+      real.init = async (h) => h.onSignIn({ user: { email: 't@flowsxr.com' }, company: { key: 'flowsxr.com', name: 'Flowsxr' }, data: { profiles: [], clients: [], invoices: [] }, backend: { upsert: async () => {}, remove: async () => {} } });
+      real.user = () => ({ email: 't@flowsxr.com' });
+      real.company = () => ({ key: 'flowsxr.com', name: 'Flowsxr' });
+    } });` });
+  await navigate();
+  await sleep(300);
+  assert.equal(await evalJs(`document.querySelector('#auth-email').textContent`), 't@flowsxr.com');
+  assert.equal(await evalJs(`document.body.classList.contains('signed-in')`), true);
+  assert.equal(await evalJs(`getComputedStyle(document.querySelector('.hero')).display`), 'none');
+  assert.equal(await evalJs(`getComputedStyle(document.querySelector('.generate > .container > h2')).display`), 'none');
+  assert.equal(await evalJs(`getComputedStyle(document.querySelector('.generate .section-sub')).display`), 'none');
+  assert.equal(await evalJs(`getComputedStyle(document.querySelector('#ai-prompt')).display !== 'none'`), true);
+  await send('Page.removeScriptToEvaluateOnNewDocument', { identifier });
+});
