@@ -23,7 +23,6 @@
       <a href="#faq">FAQ</a>
     </nav>
     <div class="nav-actions">
-      <button type="button" class="link-btn" id="open-settings">Settings</button>
       <button type="button" class="link-btn" id="open-auth">Sign in</button>
       <span class="auth-user" id="auth-user" hidden><span id="auth-email"></span> <button type="button" class="link-btn" id="sign-out">Sign out</button></span>
       <a class="btn btn-primary btn-sm" href="#generate">Create invoice</a>
@@ -286,7 +285,7 @@
       <details><summary>Is it really free?</summary><p>Yes. Create, preview and download unlimited invoices. No trials, no paywalls, no watermarks.</p></details>
       <details><summary>Do I need an account?</summary><p>No. Open the page, fill in your details and download your invoice.</p></details>
       <details><summary>Where is my data stored?</summary><p>Everything you type is saved locally in your browser only. Use “Export backup” to move it to another machine or share a starting point with a colleague.</p></details>
-      <details><summary>How does AI drafting work?</summary><p>Paste your own Anthropic API key in Settings. The description you type is sent to Claude, which returns line items, client details, tax and terms that fill the form. Nothing else leaves your device.</p></details>
+      <details><summary>How does AI drafting work?</summary><p>The description you type is sent to this site's drafting endpoint, which asks DeepSeek to turn it into line items, client details, tax and terms that fill the form. No key or setup needed. Nothing else leaves your device.</p></details>
       <details><summary>How does sign-in work?</summary><p>Enter your work email and we send a one-time sign-in link — no password. Everyone who signs in with the same email domain (say, @yourcompany.com) lands in the same workspace and shares its businesses, clients and invoices. Personal addresses like Gmail get a private workspace.</p></details>
       <details><summary>Can I move my local data into the team workspace?</summary><p>Yes. The first time you sign in to an empty workspace, the app offers to copy what is saved in this browser. You can also use Export backup and Import at any time.</p></details>
       <details><summary>Can I invoice from more than one business?</summary><p>Yes. Each business is a profile with its own name, logo, address, bank details and invoice numbering. Switch with the dropdown under “From”.</p></details>
@@ -308,7 +307,6 @@
       <a href="#features">Features</a>
       <a href="#how">How it works</a>
       <a href="#faq">FAQ</a>
-      <a href="https://www.invoala.com/" rel="noopener" target="_blank">Inspired by Invoala</a>
     </nav>
   </div>
 </footer>
@@ -333,28 +331,6 @@
       <div class="modal-actions">
         <button type="button" class="btn btn-primary" id="auth-done">Done</button>
       </div>
-    </div>
-  </div>
-</div>
-
-<!-- Settings modal -->
-<div class="modal" id="settings-modal" hidden>
-  <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="settings-title">
-    <h3 id="settings-title">Settings</h3>
-    <label>Anthropic API key
-      <input type="password" id="api-key" placeholder="sk-ant-…" autocomplete="off">
-    </label>
-    <p class="hint">Stored only in this browser. Used for the “Describe it” drafting feature. Get one at console.anthropic.com.</p>
-    <label>Model
-      <select id="api-model">
-        <option value="claude-opus-5">Claude Opus 5 (default)</option>
-        <option value="claude-sonnet-5">Claude Sonnet 5 (faster, cheaper)</option>
-        <option value="claude-haiku-4-5">Claude Haiku 4.5 (cheapest)</option>
-      </select>
-    </label>
-    <div class="modal-actions">
-      <button type="button" class="btn btn-ghost" id="settings-cancel">Cancel</button>
-      <button type="button" class="btn btn-primary" id="settings-save">Save</button>
     </div>
   </div>
 </div>

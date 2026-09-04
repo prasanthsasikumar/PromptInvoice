@@ -320,8 +320,6 @@
     const status = $('#ai-status');
     const btn = $('#ai-generate');
     if (!text) { status.textContent = 'Describe the work first.'; status.classList.add('error'); return; }
-    const settings = Store.settings();
-    if (!settings.apiKey) { openSettings(); status.textContent = 'Add your API key to use drafting.'; status.classList.add('error'); return; }
     btn.disabled = true;
     status.classList.remove('error');
     status.textContent = 'Drafting…';
@@ -331,7 +329,7 @@
         today: doc.issueDate,
         clients: Store.clients().map(function (c) { return { name: c.name, email: c.email, address: c.address }; }),
       };
-      const d = await AI.draft(text, ctx, settings);
+      const d = await AI.draft(text, ctx);
       applyDraft(d);
       renderAll();
       changed();
@@ -344,16 +342,6 @@
       btn.disabled = false;
     }
   }
-
-  /* ---------- settings ---------- */
-  function openSettings() {
-    const s = Store.settings();
-    $('#api-key').value = s.apiKey || '';
-    $('#api-model').value = s.model || AI.DEFAULT_MODEL;
-    $('#settings-modal').hidden = false;
-    $('#api-key').focus();
-  }
-  function closeSettings() { $('#settings-modal').hidden = true; }
 
   /* ---------- backup ---------- */
   function exportBackup() {
@@ -682,17 +670,6 @@
     $('#ai-prompt').addEventListener('keydown', function (e) {
       if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') { e.preventDefault(); generateFromPrompt(); }
     });
-
-    // Settings
-    $('#open-settings').addEventListener('click', openSettings);
-    $('#settings-cancel').addEventListener('click', closeSettings);
-    $('#settings-modal').addEventListener('click', function (e) { if (e.target === this) closeSettings(); });
-    $('#settings-save').addEventListener('click', function () {
-      Store.saveSettings({ apiKey: $('#api-key').value.trim(), model: $('#api-model').value });
-      closeSettings();
-      toast('Settings saved');
-    });
-    document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSettings(); });
 
     // Sign-in
     $('#open-auth').addEventListener('click', openAuth);

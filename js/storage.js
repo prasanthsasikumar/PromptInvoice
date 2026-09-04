@@ -2,7 +2,7 @@
    Local mode: everything in localStorage.
    Cloud mode (after sign-in): an in-memory cache of the shared workspace, with every
    write mirrored to the remote backend. Reads stay synchronous either way.
-   Settings and the working draft are always local to this browser. */
+   The working draft is always local to this browser. */
 (function (root) {
   'use strict';
 
@@ -10,7 +10,6 @@
     profiles: 'pi.profiles',
     clients: 'pi.clients',
     invoices: 'pi.invoices',
-    settings: 'pi.settings',
     draft: 'pi.draft',
   };
 
@@ -91,8 +90,6 @@
     saveInvoice: function (inv) { inv.savedAt = new Date().toISOString(); return upsert('invoices', inv); },
     deleteInvoice: function (id) { remove('invoices', id); },
 
-    settings: function () { return read(KEYS.settings, {}); },
-    saveSettings: function (s) { write(KEYS.settings, s); },
 
     draft: function () { return read(KEYS.draft, null); },
     saveDraft: function (d) { write(KEYS.draft, d); },

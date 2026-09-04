@@ -12,7 +12,7 @@ I built this for my own invoicing across a couple of businesses and it turned ou
 
 - **Invoices, quotes, estimates and receipts.** Switch the document type and the labels follow (Valid until, Paid on, PAID stamp).
 - **Live A4 preview and a crisp PDF.** The preview updates as you type. Download PDF prints just the invoice, one A4 page, selectable text, no watermark.
-- **Describe it, and AI drafts it.** Type what you did in plain words. Claude turns it into line items, client, tax and terms, then you review. Uses your own Anthropic API key, stored only in your browser.
+- **Describe it, and AI drafts it.** Type what you did in plain words. DeepSeek turns it into line items, client, tax and terms, then you review. No API key or setup needed.
 - **Many businesses, one place.** Each business is a profile with its own logo, address, tax number, bank details, number prefix and invoice counter (`INV-001`, `INV-002`, …).
 - **Client book and saved invoices.** Save clients for one-click reuse. Reopen, duplicate or delete saved invoices.
 - **Sign in with your work email to share with your team.** Everyone at `@yourcompany.com` lands in the same workspace and sees the same businesses, clients and invoices. Personal addresses (Gmail, Outlook…) get a private workspace.
@@ -45,11 +45,13 @@ There is no build. `index.html` plus `css/` and `js/` is the whole app. You can 
 
 ### AI drafting
 
-Click **Settings** in the nav and paste an Anthropic API key (get one at [console.anthropic.com](https://console.anthropic.com/)). It is stored only in this browser and sent straight to the Anthropic API from the page. Then describe the job:
+Describe the job in the **Describe it** box:
 
 > Invoice Acme Corp for the September prototype: 24 hours of development at $120/hr, one headset at $650, 15% GST, payment due in 14 days.
 
-The description is sent with a JSON schema; the returned fields fill the form. Default model is Claude Opus 5; Sonnet 5 and Haiku 4.5 are available in Settings for cheaper drafts.
+The page posts the description to `/api/draft`, a small Vercel function that asks DeepSeek (`deepseek-chat`, JSON mode) for the fields and fills the form with them. The DeepSeek key stays on the server.
+
+If you host your own copy, set `DEEPSEEK_API_KEY` in the Vercel project's environment variables (get a key at [platform.deepseek.com](https://platform.deepseek.com/)). Without it the button reports that drafting is not configured; everything else still works.
 
 ## Team sign-in (self-hosted)
 
@@ -82,7 +84,9 @@ js/currencies.js      ISO 4217 table
 js/calc.js            pure invoice math (unit tested)
 js/storage.js         localStorage store, with a cloud-workspace cache when signed in
 js/auth.js            magic-link sign-in and per-domain workspace (Supabase)
-js/ai.js              Anthropic Messages API call with structured output
+js/ai.js              browser client for the drafting endpoint
+api/draft.js          Vercel function: DeepSeek call, key from DEEPSEEK_API_KEY
+dev.js                local server that serves the site and mounts api/ like Vercel
 js/app.js             state, form binding, preview rendering, actions
 supabase/schema.sql   tables, workspace function, row-level security
 tests/                unit tests, headless-Chrome end-to-end tests, screenshot generator
@@ -90,14 +94,15 @@ docs/                 design spec and screenshots
 ```
 
 ```bash
-npm test                # unit tests for the money math
+npm start               # local server on :8080 (put DEEPSEEK_API_KEY in .env.local for drafting)
+npm test                # unit tests for the money math and the drafting function
 npm run test:browser    # end-to-end in headless Chrome (set CHROME=/path/to/chrome if needed)
 npm run screenshots     # regenerate docs/screenshots
 ```
 
 ## Privacy
 
-Local mode sends nothing anywhere. AI drafting sends your description to the Anthropic API with your key. Signing in stores your businesses, clients and saved invoices in the Supabase project of whoever hosts the site; if that is not you, treat it like any other hosted service. To be sure, host your own copy.
+Local mode sends nothing anywhere. AI drafting sends your description (plus your business name, currency, tax default and saved client names) through this site's server to DeepSeek. Signing in stores your businesses, clients and saved invoices in the Supabase project of whoever hosts the site; if that is not you, treat it like any other hosted service. To be sure, host your own copy.
 
 ## License
 

@@ -142,31 +142,45 @@ test('adding and switching business profile changes prefix and numbering', async
   assert.equal(await evalJs(`document.querySelector('#paper .p-name').textContent`), 'Aisee');
 });
 
-test('AI draft fills the form (API mocked)', async () => {
-  await evalJs(`localStorage.setItem('pi.settings', JSON.stringify({apiKey: 'sk-test', model: 'claude-opus-5'})); true`);
-  await evalJs(`window.__lastReq = null; window.fetch = async (url, opts) => { window.__lastReq = {url, headers: opts.headers, body: JSON.parse(opts.body)}; return { ok: true, status: 200, json: async () => ({ stop_reason: 'end_turn', content: [{ type: 'text', text: JSON.stringify({ docType: 'invoice', client: { name: 'Acme Corp', email: 'billing@acme.com', address: null }, items: [{ description: 'Logo design', qty: 1, rate: 600 }, { description: 'Design hours', qty: 12, rate: 75 }], currency: 'USD', taxRate: 8.5, taxLabel: 'Sales tax', discountType: null, discountValue: null, shipping: null, dueInDays: 15, reference: null, notes: null }) }] }) }; }; true`);
+test('AI draft fills the form (server endpoint mocked)', async () => {
+  assert.equal(await evalJs(`document.querySelector('#open-settings')`), null);
+  assert.equal(await evalJs(`document.querySelector('#settings-modal')`), null);
+  await evalJs(`window.__lastReq = null; window.fetch = async (url, opts) => { window.__lastReq = {url, headers: opts.headers, body: JSON.parse(opts.body)}; return { ok: true, status: 200, json: async () => ({ docType: 'invoice', client: { name: 'Acme Corp', email: 'billing@acme.com', address: null }, items: [{ description: 'Logo design', qty: 1, rate: 600 }, { description: 'Design hours', qty: 12, rate: 75 }], currency: 'USD', taxRate: 8.5, taxLabel: 'Sales tax', discountType: null, discountValue: null, shipping: null, dueInDays: 15, reference: null, notes: null }) }; }; true`);
+  const issueDate = await evalJs(`document.querySelector('[data-bind="issueDate"]').value`);
   await evalJs(setField('#ai-prompt', 'Designed a logo and landing page for Acme Corp'));
   await evalJs(`document.querySelector('#ai-generate').click(); true`);
   await sleep(300);
   const req = await evalJs('window.__lastReq');
-  assert.equal(req.url, 'https://api.anthropic.com/v1/messages');
-  assert.equal(req.headers['anthropic-dangerous-direct-browser-access'], 'true');
-  assert.equal(req.body.output_config.format.type, 'json_schema');
-  assert.equal(req.body.fallbacks, 'default');
+  assert.equal(req.url, '/api/draft');
+  assert.equal(req.body.description, 'Designed a logo and landing page for Acme Corp');
+  assert.equal(req.body.ctx.fromName, 'Aisee');
+  assert.equal(req.body.ctx.today, issueDate);
+  assert.equal(req.headers['Content-Type'], 'application/json');
   assert.equal(await evalJs(`document.querySelector('[data-bind="to.name"]').value`), 'Acme Corp');
   assert.equal(await evalJs(`document.querySelectorAll('#items .item-row').length`), 2);
   const totals = await evalJs(`[...document.querySelectorAll('#paper .p-totals td.r')].map(td => td.textContent)`);
   // 600 + 900 = 1500; 8.5% = 127.50; total 1627.50
   assert.deepEqual(totals, ['$1,500.00', '$127.50', '$1,627.50']);
-  assert.equal(await evalJs(`document.querySelector('[data-bind="dueDate"]').value`), '2026-09-18');
+  const due = new Date(issueDate + 'T00:00:00'); due.setDate(due.getDate() + 15);
+  const dueIso = due.getFullYear() + '-' + String(due.getMonth() + 1).padStart(2, '0') + '-' + String(due.getDate()).padStart(2, '0');
+  assert.equal(await evalJs(`document.querySelector('[data-bind="dueDate"]').value`), dueIso);
+});
+
+test('AI draft shows the server error message', async () => {
+  await evalJs(`window.fetch = async () => ({ ok: false, status: 429, json: async () => ({ error: 'The AI service is busy. Try again in a moment.' }) }); true`);
+  await evalJs(`document.querySelector('#ai-generate').click(); true`);
+  await sleep(300);
+  assert.equal(await evalJs(`document.querySelector('#ai-status').textContent`), 'The AI service is busy. Try again in a moment.');
+  assert.equal(await evalJs(`document.querySelector('#ai-status').classList.contains('error')`), true);
 });
 
 test('backup export contains profiles, clients and invoices', async () => {
   const data = await evalJs('Store.exportAll()');
   assert.equal(data.app, 'PromptInvoice');
   assert.equal(data.profiles.length, 2);
-  assert.equal(await evalJs('Auth.configured()'), false);
-  assert.equal(await evalJs(`document.querySelector('#open-auth').hidden`), true);
+  const configured = await evalJs('!!(window.PI_CONFIG && PI_CONFIG.supabaseUrl && PI_CONFIG.supabaseAnonKey)');
+  assert.equal(await evalJs('Auth.configured()'), configured);
+  assert.equal(await evalJs(`document.querySelector('#open-auth').hidden`), !configured);
   assert.equal(data.clients.length, 1);
   assert.equal(data.invoices.length, 1);
 });
