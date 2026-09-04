@@ -1,12 +1,10 @@
 # PromptInvoice
 
-Free invoice generator with AI drafting and shared team workspaces. Live at **https://invoice.flowsxr.com/**
+Free invoice and payment voucher generator with AI drafting and shared team workspaces. Live at **https://invoice.flowsxr.com/**
 
-I run a small business and needed a simple way to produce invoices, and soon payment vouchers, without paying for yet another subscription. So I built this for myself. Feel free to use it.
+I run a small business and needed a simple way to produce invoices and payment vouchers without paying for yet another subscription. So I built this for myself. Feel free to use it.
 
 If you have feedback, email me at **prasanth@flowsxr.com** or open an [issue](https://github.com/prasanthsasikumar/PromptInvoice/issues) and I will try to fit it in. Or make the change yourself and send a pull request. Have a nice day.
-
-**Next up:** payment vouchers. Same form, different paper: voucher number and date, pay to, numbered lines with quantity, unit price and net price, total payable, method of payment, and approved by / received by signature lines.
 
 ![PromptInvoice hero](docs/screenshots/hero.png)
 
@@ -18,7 +16,7 @@ If you have feedback, email me at **prasanth@flowsxr.com** or open an [issue](ht
 
 ## What it does
 
-- Invoices, quotes, estimates and receipts, with a live A4 preview and a clean PDF.
+- Invoices, quotes, estimates, receipts and payment vouchers, with a live A4 preview and a clean PDF.
 - Describe the job in plain words and AI drafts the line items, client, tax and terms. No key or setup.
 - Several businesses in one place, each with its own logo, bank details and invoice counter.
 - Client book, saved invoices, 150+ currencies, tax, discount, shipping, custom fields.

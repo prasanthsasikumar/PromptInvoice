@@ -10,7 +10,9 @@
     quote: { title: 'QUOTE', number: 'Quote number', numberShort: 'Quote #', due: 'Valid until', dueShort: 'Valid until' },
     estimate: { title: 'ESTIMATE', number: 'Estimate number', numberShort: 'Estimate #', due: 'Valid until', dueShort: 'Valid until' },
     receipt: { title: 'RECEIPT', number: 'Receipt number', numberShort: 'Receipt #', due: 'Paid on', dueShort: 'Paid' },
+    voucher: { title: 'PAYMENT VOUCHER', number: 'Voucher number', numberShort: 'Voucher no.', due: '', dueShort: '', issued: 'Voucher date', to: 'Pay to', total: 'Total payable', prefix: 'PV' },
   };
+  const DEFAULT_NOTES = 'Payment due within 14 days. Thank you for your business!';
 
   const SEED_PROFILES = [
     { name: 'My business', prefix: 'INV', currency: 'USD', taxRate: 0, taxLabel: 'Tax', counter: 0, notes: 'Payment due within 14 days. Thank you for your business!' },
@@ -71,9 +73,23 @@
       shipping: 0,
       customFields: [],
       paymentDetails: p.paymentDetails || '',
-      notes: p.notes || 'Payment due within 14 days. Thank you for your business!',
+      paymentMethod: '',
+      approvedBy: '',
+      notes: p.notes || DEFAULT_NOTES,
       theme: p.theme || '#166534',
     };
+  }
+
+  /* Switching to or from a voucher swaps the auto number prefix (PV-) and the stock invoice note. */
+  function switchDocType(type) {
+    const was = doc.docType;
+    doc.docType = type;
+    const p = currentProfile() || {};
+    const auto = function (prefix) { return Calc.nextInvoiceNumber(prefix, p.counter); };
+    if (!doc.id && type === 'voucher' && was !== 'voucher' && doc.number === auto(p.prefix)) doc.number = auto(DOC_LABELS.voucher.prefix);
+    if (!doc.id && was === 'voucher' && type !== 'voucher' && doc.number === auto(DOC_LABELS.voucher.prefix)) doc.number = auto(p.prefix);
+    if (type === 'voucher' && doc.notes === (p.notes || DEFAULT_NOTES)) doc.notes = '';
+    if (was === 'voucher' && type !== 'voucher' && !doc.notes) doc.notes = p.notes || DEFAULT_NOTES;
   }
 
   function currentProfile() {
@@ -90,8 +106,14 @@
     $$('#doc-type button').forEach(function (b) { b.classList.toggle('active', b.dataset.doctype === doc.docType); });
     $$('#themes button').forEach(function (b) { b.classList.toggle('active', b.dataset.theme === doc.theme); });
     const labels = DOC_LABELS[doc.docType];
+    const voucher = doc.docType === 'voucher';
     $('#number-label').textContent = labels.number;
     $('#due-label').textContent = labels.due;
+    $('#to-label').textContent = labels.to || 'Bill to';
+    $('#due-field').hidden = voucher;
+    $('#terms-field').hidden = voucher;
+    $('#payment-details-field').hidden = voucher;
+    $('#voucher-fields').hidden = !voucher;
     renderLogo();
     renderItems();
     renderCustomFields();
@@ -181,10 +203,11 @@
     const fromMeta = [doc.from.address, doc.from.email, doc.from.phone, doc.from.taxId ? (doc.taxLabel && doc.taxLabel !== 'Tax' ? doc.taxLabel : 'Tax') + ' no. ' + doc.from.taxId : '']
       .filter(Boolean).join('\n');
 
+    const voucher = doc.docType === 'voucher';
     const kv = [
       [L.numberShort, doc.number],
-      ['Issued', Calc.formatDate(doc.issueDate)],
-      [L.dueShort, Calc.formatDate(doc.dueDate)],
+      [L.issued || 'Issued', Calc.formatDate(doc.issueDate)],
+      [L.dueShort, voucher ? '' : Calc.formatDate(doc.dueDate)],
       ['Reference', doc.to.reference],
     ].concat(doc.customFields.map(function (f) { return [f.label, f.value]; }))
       .filter(function (r) { return r[0] && r[1]; })
@@ -194,6 +217,7 @@
     const rows = items.map(function (it, i) {
       const has = it.description || Calc.parseNumber(it.rate);
       return '<tr>' +
+        (voucher ? '<td class="num">' + (i + 1) + '</td>' : '') +
         '<td class="desc' + (has ? '' : ' ph') + '">' + (it.description ? esc(it.description) : 'Item description') + '</td>' +
         '<td class="r">' + esc(Calc.parseNumber(it.qty)) + '</td>' +
         '<td class="r">' + money(Calc.parseNumber(it.rate)) + '</td>' +
@@ -201,19 +225,20 @@
         '</tr>';
     }).join('');
 
-    let totals = '<tr><td>Subtotal</td><td class="r">' + money(t.subtotal) + '</td></tr>';
+    const extras = t.discount > 0 || t.shipping > 0 || t.taxRate > 0 || (!voucher && doc.taxRate !== '');
+    let totals = extras ? '<tr><td>Subtotal</td><td class="r">' + money(t.subtotal) + '</td></tr>' : '';
     if (t.discount > 0) {
       const dl = doc.discountType === 'percent' ? 'Discount (' + esc(Calc.parseNumber(doc.discountValue)) + '%)' : 'Discount';
       totals += '<tr><td>' + dl + '</td><td class="r">-' + money(t.discount) + '</td></tr>';
     }
-    if (t.taxRate > 0 || doc.taxRate !== '') {
+    if (t.taxRate > 0 || (!voucher && doc.taxRate !== '')) {
       totals += '<tr><td>' + esc(doc.taxLabel || 'Tax') + ' (' + esc(t.taxRate) + '%)</td><td class="r">' + money(t.tax) + '</td></tr>';
     }
     if (t.shipping > 0) totals += '<tr><td>Shipping</td><td class="r">' + money(t.shipping) + '</td></tr>';
-    totals += '<tr class="total"><td>' + (doc.docType === 'receipt' ? 'Total paid' : 'Total due') + '</td><td class="r">' + money(t.total) + '</td></tr>';
+    totals += '<tr class="total"><td>' + (L.total || (doc.docType === 'receipt' ? 'Total paid' : 'Total due')) + '</td><td class="r">' + money(t.total) + '</td></tr>';
 
     const foot = [];
-    if (doc.paymentDetails) foot.push('<div><div class="p-label">Payment details</div><div class="body">' + esc(doc.paymentDetails) + '</div></div>');
+    if (!voucher && doc.paymentDetails) foot.push('<div><div class="p-label">Payment details</div><div class="body">' + esc(doc.paymentDetails) + '</div></div>');
     if (doc.notes) foot.push('<div><div class="p-label">Notes</div><div class="body">' + esc(doc.notes) + '</div></div>');
 
     paper.innerHTML =
@@ -225,14 +250,22 @@
         '</div>' +
         '<div class="p-title-block"><div class="p-title">' + L.title + '</div><table class="p-kv">' + kv + '</table></div>' +
       '</div>' +
-      '<div class="p-billto"><div class="p-label">Billed to</div>' +
-        '<div class="p-client">' + (esc(doc.to.name) || 'Client Name') + '</div>' +
-        '<div class="p-meta">' + (esc([doc.to.address, doc.to.email].filter(Boolean).join('\n')) || 'Client address') + '</div>' +
+      '<div class="p-billto"><div class="p-label">' + (L.to || 'Billed to') + '</div>' +
+        '<div class="p-client">' + (esc(doc.to.name) || (voucher ? 'Payee name' : 'Client Name')) + '</div>' +
+        '<div class="p-meta">' + (esc([doc.to.address, doc.to.email].filter(Boolean).join('\n')) || (voucher ? 'Payee address' : 'Client address')) + '</div>' +
         (doc.docType === 'receipt' ? '<span class="p-paid">PAID</span>' : '') +
       '</div>' +
-      '<table class="p-items"><thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th></tr></thead><tbody>' + rows + '</tbody></table>' +
+      '<table class="p-items"><thead><tr>' +
+        (voucher ? '<th class="num">No.</th><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Net price</th>'
+                 : '<th>Description</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th>') +
+      '</tr></thead><tbody>' + rows + '</tbody></table>' +
       '<div class="p-totals-wrap"><table class="p-totals">' + totals + '</table></div>' +
-      (foot.length ? '<div class="p-foot">' + foot.join('') + '</div>' : '');
+      (voucher && doc.paymentMethod ? '<div class="p-method"><strong>Method of payment:</strong> ' + esc(doc.paymentMethod) + '</div>' : '') +
+      (foot.length ? '<div class="p-foot">' + foot.join('') + '</div>' : '') +
+      (voucher ? '<div class="p-sign">' +
+          '<div><div class="p-sign-line"></div><div class="p-sign-role">Approved by</div><div class="p-sign-name">Name: ' + esc(doc.approvedBy) + '</div></div>' +
+          '<div><div class="p-sign-line"></div><div class="p-sign-role">Received by</div><div class="p-sign-name">Name: ' + esc(doc.to.name) + '</div></div>' +
+        '</div>' : '');
   }
 
   function renderSavedList() {
@@ -289,7 +322,7 @@
 
   /* ---------- AI ---------- */
   function applyDraft(d) {
-    if (d.docType) doc.docType = d.docType;
+    if (d.docType) switchDocType(d.docType);
     if (d.client) {
       if (d.client.name) doc.to.name = d.client.name;
       if (d.client.email) doc.to.email = d.client.email;
@@ -313,6 +346,7 @@
     if (d.dueInDays != null) doc.dueDate = Calc.addDays(doc.issueDate, d.dueInDays);
     if (d.reference) doc.to.reference = d.reference;
     if (d.notes) doc.notes = d.notes;
+    if (d.paymentMethod) doc.paymentMethod = d.paymentMethod;
   }
 
   async function generateFromPrompt() {
@@ -525,7 +559,7 @@
     $('#doc-type').addEventListener('click', function (e) {
       const b = e.target.closest('button[data-doctype]');
       if (!b) return;
-      doc.docType = b.dataset.doctype;
+      switchDocType(b.dataset.doctype);
       renderForm(); changed();
     });
 

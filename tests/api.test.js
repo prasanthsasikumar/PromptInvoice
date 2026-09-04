@@ -20,7 +20,7 @@ const DRAFT = {
   items: [{ description: 'Logo design', qty: 1, rate: 600 }],
   currency: 'USD', taxRate: 8.5, taxLabel: 'Sales tax',
   discountType: null, discountValue: null, shipping: null,
-  dueInDays: 15, reference: null, notes: null,
+  dueInDays: 15, reference: null, notes: null, paymentMethod: null,
 };
 
 function mockUpstream(status, payload) {
@@ -131,4 +131,21 @@ test('caps very long descriptions', async () => {
   await handler(fakeReq({ description: 'x'.repeat(20001), ctx: CTX }), res);
   assert.equal(res.statusCode, 400);
   assert.equal(calls.length, 0);
+});
+
+test('accepts a payment voucher with a method of payment', async () => {
+  const calls = mockUpstream(200, completion(JSON.stringify(Object.assign({}, DRAFT, { docType: 'voucher', paymentMethod: 'Bank transfer' }))));
+  const res = fakeRes();
+  await handler(fakeReq({ description: 'Payment voucher for Sam Lee, services for August, 350, bank transfer', ctx: CTX }), res);
+  assert.equal(res.statusCode, 200);
+  assert.equal(res.body.docType, 'voucher');
+  assert.equal(res.body.paymentMethod, 'Bank transfer');
+  assert.match(calls[0].body.messages[0].content, /voucher/i);
+});
+
+test('paymentMethod is null when the model omits it', async () => {
+  mockUpstream(200, completion(JSON.stringify(DRAFT)));
+  const res = fakeRes();
+  await handler(fakeReq({ description: 'Logo for Acme', ctx: CTX }), res);
+  assert.equal(res.body.paymentMethod, null);
 });

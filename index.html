@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>PromptInvoice: Free Invoice Generator</title>
-  <meta name="description" content="Create professional invoices, quotes, estimates and receipts in seconds. Describe the job in plain words and let AI draft it. Free, no sign-up, everything stays in your browser.">
+  <meta name="description" content="Create professional invoices, quotes, estimates, receipts and payment vouchers in seconds. Describe the job in plain words and let AI draft it. Free, no sign-up, everything stays in your browser.">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23166534'/%3E%3Cpath d='M9 8h14v16H9z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M12 13h8M12 17h8M12 21h5' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -35,7 +35,7 @@
   <section class="hero">
     <div class="container">
       <h1>Invoices that look<br><span class="accent">professional.</span></h1>
-      <p class="lede">Build a beautiful invoice, quote, estimate or receipt and download a polished PDF in seconds. Describe the job in plain words and let AI draft it for you. Sign in with your work email to share it with your team.</p>
+      <p class="lede">Build a beautiful invoice, quote, estimate, receipt or payment voucher and download a polished PDF in seconds. Describe the job in plain words and let AI draft it for you. Sign in with your work email to share it with your team.</p>
       <div class="hero-cta">
         <a class="btn btn-primary" href="#generate">Create your invoice</a>
         <a class="btn-link" href="#how">How it works ›</a>
@@ -72,6 +72,7 @@
               <button type="button" data-doctype="quote">Quote</button>
               <button type="button" data-doctype="estimate">Estimate</button>
               <button type="button" data-doctype="receipt">Receipt</button>
+              <button type="button" data-doctype="voucher">Voucher</button>
             </div>
           </section>
 
@@ -106,7 +107,7 @@
             </div>
             <div>
               <div class="col-head">
-                <h3>Bill to</h3>
+                <h3 id="to-label">Bill to</h3>
                 <div class="picker">
                   <select id="client-select" aria-label="Saved clients"><option value="">Saved clients…</option></select>
                   <button type="button" class="icon-btn" id="client-delete" title="Delete client">×</button>
@@ -152,9 +153,13 @@
               <label><span id="number-label">Invoice number</span><input type="text" data-bind="number"></label>
               <div class="row dates">
                 <label>Issue date<input type="date" data-bind="issueDate"></label>
-                <label><span id="due-label">Due date</span><input type="date" data-bind="dueDate"></label>
+                <label id="due-field"><span id="due-label">Due date</span><input type="date" data-bind="dueDate"></label>
               </div>
-              <label>Payment terms
+              <div id="voucher-fields" hidden>
+                <label>Method of payment<input type="text" data-bind="paymentMethod" placeholder="Bank transfer"></label>
+                <label>Approved by<input type="text" data-bind="approvedBy" placeholder="Your name"></label>
+              </div>
+              <label id="terms-field">Payment terms
                 <select id="terms-select" aria-label="Payment terms">
                   <option value="">Custom</option>
                   <option value="0">Due on receipt</option>
@@ -190,7 +195,7 @@
 
           <!-- Payment + notes -->
           <section class="fs two-col">
-            <label>Payment details<textarea data-bind="paymentDetails" rows="4" placeholder="Bank: Example Bank&#10;Account name: Studio Nova Ltd&#10;Account no: 01-0000-0000000-00&#10;Reference: invoice number"></textarea></label>
+            <label id="payment-details-field">Payment details<textarea data-bind="paymentDetails" rows="4" placeholder="Bank: Example Bank&#10;Account name: Studio Nova Ltd&#10;Account no: 01-0000-0000000-00&#10;Reference: invoice number"></textarea></label>
             <label>Notes &amp; terms<textarea data-bind="notes" rows="4" placeholder="Payment due within 14 days. Thank you for your business!"></textarea></label>
           </section>
 
@@ -289,7 +294,7 @@
       <details><summary>How does sign-in work?</summary><p>Enter your work email and we send a one-time sign-in link, no password. Everyone who signs in with the same email domain (say, @yourcompany.com) lands in the same workspace and shares its businesses, clients and invoices. Personal addresses like Gmail get a private workspace.</p></details>
       <details><summary>Can I move my local data into the team workspace?</summary><p>Yes. The first time you sign in to an empty workspace, the app offers to copy what is saved in this browser. You can also use Export backup and Import at any time.</p></details>
       <details><summary>Can I invoice from more than one business?</summary><p>Yes. Each business is a profile with its own name, logo, address, bank details and invoice numbering. Switch with the dropdown under “From”.</p></details>
-      <details><summary>Can I use it for quotes or receipts?</summary><p>Yes. Pick Quote, Estimate or Receipt as the document type and the labels change accordingly.</p></details>
+      <details><summary>Can I use it for quotes, receipts or payment vouchers?</summary><p>Yes. Pick Quote, Estimate, Receipt or Voucher as the document type. A voucher records money you pay out: pay to, numbered lines, total payable, method of payment, and approved by / received by signature lines.</p></details>
       <details><summary>What do I get when I download?</summary><p>A clean A4 PDF with your logo, line items, tax breakdown and payment details. Download opens the print dialog. Choose “Save as PDF”.</p></details>
       <details><summary>Does it calculate tax automatically?</summary><p>Yes. Enter your rate (GST, VAT, sales tax) and the total updates live. Discounts apply before tax; shipping is added after.</p></details>
     </div>

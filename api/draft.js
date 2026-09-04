@@ -7,7 +7,7 @@ const MODEL = 'deepseek-chat';
 const MAX_DESCRIPTION = 20000;
 
 const EXAMPLE = {
-  docType: 'invoice | quote | estimate | receipt',
+  docType: 'invoice | quote | estimate | receipt | voucher',
   client: { name: 'string|null', email: 'string|null', address: 'string|null' },
   items: [{ description: 'string', qty: 1, rate: 100 }],
   currency: 'ISO 4217 code|null',
@@ -19,6 +19,7 @@ const EXAMPLE = {
   dueInDays: 'integer|null',
   reference: 'string|null',
   notes: 'string|null',
+  paymentMethod: 'string|null',
 };
 
 function systemPrompt(ctx) {
@@ -35,7 +36,8 @@ function systemPrompt(ctx) {
     '- dueInDays: payment terms in days ("net 30" -> 30, "due on receipt" -> 0).',
     '- reference: PO or project reference if given.',
     '- notes: short payment-terms or thank-you sentence only if the description asks for one.',
-    '- docType: quote/estimate/receipt only if the description says so; otherwise "invoice".',
+    '- docType: "voucher" when the description is a payment voucher, i.e. the business is paying someone (a contractor, staff, a supplier). quote/estimate/receipt only if the description says so; otherwise "invoice".',
+    '- paymentMethod: how the money is paid (Bank transfer, Cash, PayNow, Cheque) if mentioned, mainly for vouchers.',
     'Issuing business is already known: ' + (ctx.fromName || 'unknown') + '.',
     'Default currency for this business: ' + (ctx.currency || 'USD') + '. Default tax: ' + (ctx.taxRate || 0) + '% ' + (ctx.taxLabel || '') + '.',
     'Known clients (reuse exact name and details when the description refers to one): ' + (ctx.clients && ctx.clients.length ? JSON.stringify(ctx.clients) : 'none') + '.',
@@ -53,7 +55,7 @@ function normalize(d) {
   const items = Array.isArray(d.items) ? d.items : [];
   const due = num(d.dueInDays);
   return {
-    docType: oneOf(d.docType, ['invoice', 'quote', 'estimate', 'receipt']) || 'invoice',
+    docType: oneOf(d.docType, ['invoice', 'quote', 'estimate', 'receipt', 'voucher']) || 'invoice',
     client: { name: str(c.name), email: str(c.email), address: str(c.address) },
     items: items
       .filter(function (it) { return it && typeof it === 'object'; })
@@ -68,6 +70,7 @@ function normalize(d) {
     dueInDays: due === null ? null : Math.round(due),
     reference: str(d.reference),
     notes: str(d.notes),
+    paymentMethod: str(d.paymentMethod),
   };
 }
 

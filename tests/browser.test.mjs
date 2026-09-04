@@ -103,6 +103,37 @@ test('document type switches labels; receipt shows PAID', async () => {
   await evalJs(`document.querySelector('#doc-type [data-doctype=invoice]').click(); true`);
 });
 
+test('payment voucher: pay-to, numbered lines, total payable, signatures; no due date', async () => {
+  await evalJs(`document.querySelector('#doc-type [data-doctype=voucher]').click(); true`);
+  assert.equal(await evalJs(`document.querySelector('#paper .p-title').textContent`), 'PAYMENT VOUCHER');
+  assert.equal(await evalJs(`document.querySelector('#number-label').textContent`), 'Voucher number');
+  assert.equal(await evalJs(`document.querySelector('#to-label').textContent`), 'Pay to');
+  assert.equal(await evalJs(`document.querySelector('#due-field').hidden`), true);
+  assert.equal(await evalJs(`document.querySelector('#terms-field').hidden`), true);
+  assert.equal(await evalJs(`document.querySelector('#voucher-fields').hidden`), false);
+  assert.equal(await evalJs(`document.querySelector('[data-bind="number"]').value.startsWith('PV-')`), true);
+  await evalJs(setField('[data-bind="paymentMethod"]', 'Bank transfer'));
+  await evalJs(setField('[data-bind="approvedBy"]', 'Jane Owner'));
+  await evalJs(setField('[data-bind="to.name"]', 'Sam Lee'));
+  const heads = await evalJs(`[...document.querySelectorAll('#paper .p-items th')].map(th => th.textContent)`);
+  assert.deepEqual(heads, ['No.', 'Description', 'Qty', 'Unit price', 'Net price']);
+  assert.equal(await evalJs(`document.querySelector('#paper .p-billto .p-label').textContent`), 'Pay to');
+  const kv = await evalJs(`[...document.querySelectorAll('#paper .p-kv td:first-child')].map(td => td.textContent)`);
+  assert.deepEqual(kv, ['Voucher no.', 'Voucher date']);
+  assert.equal(await evalJs(`document.querySelector('#paper .p-totals tr.total td').textContent`), 'Total payable');
+  await evalJs(setField('[data-bind="taxRate"]', '0'));
+  await evalJs(setField('[data-bind="discountValue"]', '0'));
+  await evalJs(setField('[data-bind="shipping"]', '0'));
+  assert.equal(await evalJs(`document.querySelectorAll('#paper .p-totals tr').length`), 1);   // no subtotal/tax rows on a plain voucher
+  assert.equal(await evalJs(`document.querySelector('#paper .p-method').textContent`), 'Method of payment: Bank transfer');
+  const sig = await evalJs(`[...document.querySelectorAll('#paper .p-sign .p-sign-name')].map(el => el.textContent)`);
+  assert.deepEqual(sig, ['Name: Jane Owner', 'Name: Sam Lee']);
+  await evalJs(`document.querySelector('#doc-type [data-doctype=invoice]').click(); true`);
+  assert.equal(await evalJs(`document.querySelector('#due-field').hidden`), false);
+  assert.equal(await evalJs(`document.querySelector('#voucher-fields').hidden`), true);
+  assert.equal(await evalJs(`document.querySelector('[data-bind="number"]').value`), 'INV-001');
+});
+
 test('payment terms select sets the due date', async () => {
   await evalJs(setField('[data-bind="issueDate"]', '2026-09-03'));
   await evalJs(setField('#terms-select', '30'));
