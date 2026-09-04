@@ -77,6 +77,7 @@
       approvedBy: '',
       notes: p.notes || DEFAULT_NOTES,
       theme: p.theme || '#166534',
+      layout: p.layout || 'stacked',
     };
   }
 
@@ -241,20 +242,27 @@
     if (!voucher && doc.paymentDetails) foot.push('<div><div class="p-label">Payment details</div><div class="body">' + esc(doc.paymentDetails) + '</div></div>');
     if (doc.notes) foot.push('<div><div class="p-label">Notes</div><div class="body">' + esc(doc.notes) + '</div></div>');
 
-    paper.innerHTML =
-      '<div class="p-head">' +
-        '<div class="p-from">' +
-          (doc.from.logo ? '<img class="p-logo" src="' + esc(doc.from.logo) + '" alt="">' : '') +
-          '<div class="p-name">' + (esc(doc.from.name) || 'Your Company') + '</div>' +
-          '<div class="p-meta">' + (esc(fromMeta) || 'Your address\nyou@example.com') + '</div>' +
-        '</div>' +
-        '<div class="p-title-block"><div class="p-title">' + L.title + '</div><table class="p-kv">' + kv + '</table></div>' +
-      '</div>' +
-      '<div class="p-billto"><div class="p-label">' + (L.to || 'Billed to') + '</div>' +
-        '<div class="p-client">' + (esc(doc.to.name) || (voucher ? 'Payee name' : 'Client Name')) + '</div>' +
-        '<div class="p-meta">' + (esc([doc.to.address, doc.to.email].filter(Boolean).join('\n')) || (voucher ? 'Payee address' : 'Client address')) + '</div>' +
-        (doc.docType === 'receipt' ? '<span class="p-paid">PAID</span>' : '') +
-      '</div>' +
+    const side = doc.layout === 'side';
+    const logo = doc.from.logo ? '<img class="p-logo" src="' + esc(doc.from.logo) + '" alt="">' : '';
+    const fromBlock = '<div class="p-name">' + (esc(doc.from.name) || 'Your Company') + '</div>' +
+      '<div class="p-meta">' + (esc(fromMeta) || 'Your address\nyou@example.com') + '</div>';
+    const toBlock = '<div class="p-label">' + (L.to || 'Billed to') + '</div>' +
+      '<div class="p-client">' + (esc(doc.to.name) || (voucher ? 'Payee name' : 'Client Name')) + '</div>' +
+      '<div class="p-meta">' + (esc([doc.to.address, doc.to.email].filter(Boolean).join('\n')) || (voucher ? 'Payee address' : 'Client address')) + '</div>' +
+      (doc.docType === 'receipt' ? '<span class="p-paid">PAID</span>' : '');
+    const titleBlock = '<div class="p-title-block"><div class="p-title">' + L.title + '</div><table class="p-kv">' + kv + '</table></div>';
+
+    const parties = side
+      ? '<div class="p-head side"><div class="p-from">' + logo + '</div>' + titleBlock + '</div>' +
+        '<div class="p-parties">' +
+          '<div class="p-party"><div class="p-label">From</div><div class="p-client">' + (esc(doc.from.name) || 'Your Company') + '</div>' +
+            '<div class="p-meta">' + (esc(fromMeta) || 'Your address\nyou@example.com') + '</div></div>' +
+          '<div class="p-party">' + toBlock + '</div>' +
+        '</div>'
+      : '<div class="p-head"><div class="p-from">' + logo + fromBlock + '</div>' + titleBlock + '</div>' +
+        '<div class="p-billto">' + toBlock + '</div>';
+
+    paper.innerHTML = parties +
       '<table class="p-items"><thead><tr>' +
         (voucher ? '<th class="num">No.</th><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Net price</th>'
                  : '<th>Description</th><th class="r">Qty</th><th class="r">Rate</th><th class="r">Amount</th>') +
@@ -266,6 +274,10 @@
           '<div><div class="p-sign-line"></div><div class="p-sign-role">Approved by</div><div class="p-sign-name">Name: ' + esc(doc.approvedBy) + '</div></div>' +
           '<div><div class="p-sign-line"></div><div class="p-sign-role">Received by</div><div class="p-sign-name">Name: ' + esc(doc.to.name) + '</div></div>' +
         '</div>' : '');
+
+    // A preview taller than the viewport cannot stay sticky or its bottom would be unreachable.
+    const col = $('.preview-col');
+    if (col) col.classList.toggle('tall', col.offsetHeight > window.innerHeight - 90);
   }
 
   function renderSavedList() {
@@ -302,6 +314,7 @@
     if (p.taxLabel) doc.taxLabel = p.taxLabel;
     if (p.paymentDetails != null) doc.paymentDetails = p.paymentDetails;
     if (p.theme) doc.theme = p.theme;
+    if (p.layout) doc.layout = p.layout;
     if (!doc.id) doc.number = Calc.nextInvoiceNumber(p.prefix, p.counter);
   }
 
@@ -311,7 +324,7 @@
       name: doc.from.name, email: doc.from.email, phone: doc.from.phone, address: doc.from.address,
       taxId: doc.from.taxId, prefix: doc.from.prefix, logo: doc.from.logo,
       currency: doc.currency, taxRate: doc.taxRate, taxLabel: doc.taxLabel,
-      paymentDetails: doc.paymentDetails, notes: doc.notes, theme: doc.theme,
+      paymentDetails: doc.paymentDetails, notes: doc.notes, theme: doc.theme, layout: doc.layout,
     });
     Store.saveProfile(p);
     doc.from.profileId = p.id;
@@ -543,6 +556,7 @@
   function bind() {
     // Generic bound inputs
     $$('[data-bind]').forEach(function (el) {
+      if (el.tagName === 'SELECT') el.addEventListener('change', function () { el.dispatchEvent(new Event('input')); });
       el.addEventListener('input', function () {
         const path = el.dataset.bind;
         let v = el.value;

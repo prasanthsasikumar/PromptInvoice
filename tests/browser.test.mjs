@@ -134,6 +134,33 @@ test('payment voucher: pay-to, numbered lines, total payable, signatures; no due
   assert.equal(await evalJs(`document.querySelector('[data-bind="number"]').value`), 'INV-001');
 });
 
+test('preview grows to show every item instead of clipping at the first page', async () => {
+  const before = await evalJs(`document.querySelectorAll('#items .item-row').length`);
+  for (let i = 0; i < 16; i++) await evalJs(`document.querySelector('#item-add').click(); true`);
+  assert.equal(await evalJs(`document.querySelectorAll('#paper .p-items tbody tr').length`), before + 16);
+  const fits = await evalJs(`(() => { const p = document.querySelector('#paper').getBoundingClientRect(); const rows = document.querySelectorAll('#paper .p-items tbody tr'); const last = rows[rows.length - 1].getBoundingClientRect(); const tot = document.querySelector('#paper .p-totals').getBoundingClientRect(); return last.bottom <= p.bottom && tot.bottom <= p.bottom && p.height > p.width * 1.4; })()`);
+  assert.equal(fits, true);
+  assert.equal(await evalJs(`getComputedStyle(document.querySelector('#paper')).overflowY`), 'visible');
+  for (let i = 0; i < 16; i++) await evalJs(`document.querySelector('#items .item-row:last-child .remove').click(); true`);
+  assert.equal(await evalJs(`document.querySelectorAll('#items .item-row').length`), before);
+});
+
+test('parties can be laid out side by side', async () => {
+  await evalJs(`document.querySelector('#doc-type [data-doctype=voucher]').click(); true`);
+  assert.equal(await evalJs(`!!document.querySelector('#paper .p-billto')`), true);
+  await evalJs(`{ const s = document.querySelector('#layout-select'); s.value = 'side'; s.dispatchEvent(new Event('change', {bubbles:true})); } true`);
+  assert.equal(await evalJs(`!!document.querySelector('#paper .p-billto')`), false);
+  const labels = await evalJs(`[...document.querySelectorAll('#paper .p-parties .p-party .p-label')].map(el => el.textContent)`);
+  assert.deepEqual(labels, ['From', 'Pay to']);
+  const names = await evalJs(`[...document.querySelectorAll('#paper .p-parties .p-party .p-client')].map(el => el.textContent)`);
+  assert.equal(names[1], 'Sam Lee');
+  await evalJs(`document.querySelector('#doc-type [data-doctype=invoice]').click(); true`);
+  assert.deepEqual(await evalJs(`[...document.querySelectorAll('#paper .p-parties .p-party .p-label')].map(el => el.textContent)`), ['From', 'Billed to']);
+  await evalJs(`{ const s = document.querySelector('#layout-select'); s.value = 'stacked'; s.dispatchEvent(new Event('change', {bubbles:true})); } true`);
+  assert.equal(await evalJs(`!!document.querySelector('#paper .p-billto')`), true);
+  assert.equal(await evalJs(`!!document.querySelector('#paper .p-parties')`), false);
+});
+
 test('payment terms select sets the due date', async () => {
   await evalJs(setField('[data-bind="issueDate"]', '2026-09-03'));
   await evalJs(setField('#terms-select', '30'));

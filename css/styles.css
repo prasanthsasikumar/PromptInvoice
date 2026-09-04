@@ -172,11 +172,12 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
 
 /* Preview column */
 .preview-col { position: sticky; top: 76px; }
-.paper-wrap { background: #fff; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--hairline); overflow: hidden; }
+.preview-col.tall { position: static; }   /* a preview taller than the viewport must scroll with the page */
+.paper-wrap { background: #fff; border-radius: 16px; box-shadow: var(--shadow); border: 1px solid var(--hairline); overflow: hidden; container-type: inline-size; }
 .paper {
   --theme: #166534;
-  width: 100%; aspect-ratio: 210 / 297; padding: 8.5% 8%; font-size: 11px; color: var(--ink); line-height: 1.45;
-  display: flex; flex-direction: column; overflow: hidden; background: #fff;
+  width: 100%; min-height: calc(100cqw * 297 / 210); padding: 8.5% 8%; font-size: 11px; color: var(--ink); line-height: 1.45;
+  display: flex; flex-direction: column; background: #fff;
 }
 .paper * { box-sizing: border-box; }
 .p-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
@@ -190,6 +191,9 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
 .p-kv td { padding: 1px 0 1px 12px; color: #6e6e73; text-align: right; }
 .p-kv td:last-child { color: var(--ink); font-weight: 500; }
 .p-billto { margin-top: 22px; }
+.p-parties { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 22px; }
+.p-party { min-width: 0; }
+.p-head.side { align-items: flex-end; }
 .p-label { font-size: 9px; text-transform: uppercase; letter-spacing: .1em; color: #8e8e93; font-weight: 600; }
 .p-client { font-weight: 600; font-size: 12px; margin-top: 2px; }
 .p-items { width: 100%; border-collapse: collapse; margin-top: 22px; font-size: 10.5px; }
@@ -289,7 +293,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
 }
 
 /* Print: only the invoice paper, A4 */
-@page { size: A4; margin: 0; }
+@page { size: A4; margin: 16mm 16mm 18mm; }   /* page margins, so every printed page gets them, not just the first */
 @media print {
   body { background: #fff; }
   body > *:not(main) { display: none !important; }
@@ -302,7 +306,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
   .preview-col { position: static; }
   .paper-wrap { border: 0; border-radius: 0; box-shadow: none; }
   .paper {
-    width: 210mm; min-height: 297mm; aspect-ratio: auto; padding: 18mm 16mm; font-size: 11pt;
+    width: 178mm; min-height: 262mm; padding: 0; font-size: 11pt;
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .p-name { font-size: 15pt; }
@@ -314,4 +318,8 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
   .p-logo { max-height: 18mm; max-width: 50mm; }
   .p-totals tr.total td { font-size: 12pt; }
   .p-items td { padding: 6pt 0; }
+  .p-items thead { display: table-header-group; }
+  .p-items tr, .p-totals-wrap, .p-method, .p-foot, .p-sign, .p-parties, .p-billto { break-inside: avoid; page-break-inside: avoid; }
+  .p-sign { margin-top: 28pt; }
+  .p-sign-line { height: 26pt; }
 }
