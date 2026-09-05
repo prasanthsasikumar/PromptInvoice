@@ -18,7 +18,7 @@ If you have feedback, email me at **prasanth@flowsxr.com** or open an [issue](ht
 
 - Invoices, quotes, estimates, receipts and payment vouchers, with a live A4 preview and a clean PDF.
 - Describe the job in plain words and AI drafts the line items, client, tax and terms. No key or setup.
-- Several businesses in one place, each with its own logo, bank details and invoice counter.
+- Several businesses in one place, each with its own logo, signature, bank details and invoice counter. The signature signs vouchers as "Approved by" and appears as the authorised signature on other documents.
 - Client book, saved invoices, 150+ currencies, tax, discount, shipping, custom fields.
 - Sign in with a work email and everyone at your domain shares the same businesses, clients and invoices.
 - Everything stays in your browser unless you sign in. Backup export and import as JSON.

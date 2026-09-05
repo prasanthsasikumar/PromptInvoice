@@ -112,7 +112,7 @@
     },
     hasLocalData: function () {
       const s = Store.localSnapshot();
-      return s.profiles.some(function (p) { return p.email || p.address || p.logo || p.paymentDetails; }) || s.clients.length > 0 || s.invoices.length > 0;
+      return s.profiles.some(function (p) { return p.email || p.address || p.logo || p.signature || p.paymentDetails; }) || s.clients.length > 0 || s.invoices.length > 0;
     },
     isEmpty: function () {
       return !list('profiles').length && !list('clients').length && !list('invoices').length;

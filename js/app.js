@@ -6,11 +6,11 @@
   const $$ = function (sel, root) { return Array.prototype.slice.call((root || document).querySelectorAll(sel)); };
 
   const DOC_LABELS = {
-    invoice: { title: 'INVOICE', number: 'Invoice number', numberShort: 'Invoice #', due: 'Due date', dueShort: 'Due' },
-    quote: { title: 'QUOTE', number: 'Quote number', numberShort: 'Quote #', due: 'Valid until', dueShort: 'Valid until' },
-    estimate: { title: 'ESTIMATE', number: 'Estimate number', numberShort: 'Estimate #', due: 'Valid until', dueShort: 'Valid until' },
-    receipt: { title: 'RECEIPT', number: 'Receipt number', numberShort: 'Receipt #', due: 'Paid on', dueShort: 'Paid' },
-    voucher: { title: 'PAYMENT VOUCHER', number: 'Voucher number', numberShort: 'Voucher no.', due: '', dueShort: '', issued: 'Voucher date', to: 'Pay to', total: 'Total payable', prefix: 'PV' },
+    invoice: { title: 'INVOICE', name: 'invoice', number: 'Invoice number', numberShort: 'Invoice #', due: 'Due date', dueShort: 'Due' },
+    quote: { title: 'QUOTE', name: 'quote', number: 'Quote number', numberShort: 'Quote #', due: 'Valid until', dueShort: 'Valid until' },
+    estimate: { title: 'ESTIMATE', name: 'estimate', number: 'Estimate number', numberShort: 'Estimate #', due: 'Valid until', dueShort: 'Valid until' },
+    receipt: { title: 'RECEIPT', name: 'receipt', number: 'Receipt number', numberShort: 'Receipt #', due: 'Paid on', dueShort: 'Paid' },
+    voucher: { title: 'PAYMENT VOUCHER', name: 'voucher', number: 'Voucher number', numberShort: 'Voucher no.', due: '', dueShort: '', issued: 'Voucher date', to: 'Pay to', total: 'Total payable', prefix: 'PV' },
   };
   const DEFAULT_NOTES = 'Payment due within 14 days. Thank you for your business!';
 
@@ -61,7 +61,7 @@
       dueDate: Calc.addDays(today, 14),
       from: {
         profileId: p.id || null, name: p.name || '', email: p.email || '', phone: p.phone || '',
-        address: p.address || '', taxId: p.taxId || '', prefix: p.prefix || '', logo: p.logo || '',
+        address: p.address || '', taxId: p.taxId || '', prefix: p.prefix || '', logo: p.logo || '', signature: p.signature || '',
       },
       to: { clientId: null, name: '', email: '', address: '', reference: '' },
       items: [blankItem()],
@@ -115,7 +115,9 @@
     $('#terms-field').hidden = voucher;
     $('#payment-details-field').hidden = voucher;
     $('#voucher-fields').hidden = !voucher;
+    $('#ai-generate').textContent = 'Generate ' + labels.name;
     renderLogo();
+    renderSignature();
     renderItems();
     renderCustomFields();
     syncTermsSelect();
@@ -129,6 +131,14 @@
     img.hidden = !has;
     $('#logo-remove').hidden = !has;
     if (has) img.src = doc.from.logo;
+  }
+
+  function renderSignature() {
+    const img = $('#signature-thumb');
+    const has = !!doc.from.signature;
+    img.hidden = !has;
+    $('#signature-remove').hidden = !has;
+    if (has) img.src = doc.from.signature;
   }
 
   function renderItems() {
@@ -243,6 +253,7 @@
     if (doc.notes) foot.push('<div><div class="p-label">Notes</div><div class="body">' + esc(doc.notes) + '</div></div>');
 
     const side = doc.layout === 'side';
+    const signature = doc.from.signature ? '<img class="p-sig" src="' + esc(doc.from.signature) + '" alt="Signature">' : '';
     const logo = doc.from.logo ? '<img class="p-logo" src="' + esc(doc.from.logo) + '" alt="">' : '';
     const fromBlock = '<div class="p-name">' + (esc(doc.from.name) || 'Your Company') + '</div>' +
       '<div class="p-meta">' + (esc(fromMeta) || 'Your address\nyou@example.com') + '</div>';
@@ -271,8 +282,11 @@
       (voucher && doc.paymentMethod ? '<div class="p-method"><strong>Method of payment:</strong> ' + esc(doc.paymentMethod) + '</div>' : '') +
       (foot.length ? '<div class="p-foot">' + foot.join('') + '</div>' : '') +
       (voucher ? '<div class="p-sign">' +
-          '<div><div class="p-sign-line"></div><div class="p-sign-role">Approved by</div><div class="p-sign-name">Name: ' + esc(doc.approvedBy) + '</div></div>' +
+          '<div><div class="p-sign-line">' + signature + '</div><div class="p-sign-role">Approved by</div><div class="p-sign-name">Name: ' + esc(doc.approvedBy) + '</div></div>' +
           '<div><div class="p-sign-line"></div><div class="p-sign-role">Received by</div><div class="p-sign-name">Name: ' + esc(doc.to.name) + '</div></div>' +
+        '</div>'
+      : signature ? '<div class="p-sign single">' +
+          '<div><div class="p-sign-line">' + signature + '</div><div class="p-sign-role">Authorised signature</div><div class="p-sign-name">' + esc(doc.from.name) + '</div></div>' +
         '</div>' : '');
 
     // A preview taller than the viewport cannot stay sticky or its bottom would be unreachable.
@@ -308,7 +322,7 @@
   /* ---------- profiles ---------- */
   function applyProfile(p) {
     if (!p) return;
-    doc.from = { profileId: p.id, name: p.name || '', email: p.email || '', phone: p.phone || '', address: p.address || '', taxId: p.taxId || '', prefix: p.prefix || '', logo: p.logo || '' };
+    doc.from = { profileId: p.id, name: p.name || '', email: p.email || '', phone: p.phone || '', address: p.address || '', taxId: p.taxId || '', prefix: p.prefix || '', logo: p.logo || '', signature: p.signature || '' };
     if (p.currency) doc.currency = p.currency;
     if (p.taxRate != null) doc.taxRate = p.taxRate;
     if (p.taxLabel) doc.taxLabel = p.taxLabel;
@@ -322,7 +336,7 @@
     const existing = currentProfile() || { id: null, counter: 0 };
     const p = Object.assign({}, existing, {
       name: doc.from.name, email: doc.from.email, phone: doc.from.phone, address: doc.from.address,
-      taxId: doc.from.taxId, prefix: doc.from.prefix, logo: doc.from.logo,
+      taxId: doc.from.taxId, prefix: doc.from.prefix, logo: doc.from.logo, signature: doc.from.signature || '',
       currency: doc.currency, taxRate: doc.taxRate, taxLabel: doc.taxLabel,
       paymentDetails: doc.paymentDetails, notes: doc.notes, theme: doc.theme, layout: doc.layout,
     });
@@ -381,7 +395,7 @@
       renderAll();
       changed();
       status.textContent = 'Drafted. Review before sending.';
-      toast('Invoice drafted');
+      toast(DOC_LABELS[doc.docType].name.replace(/^./, function (c) { return c.toUpperCase(); }) + ' drafted');
     } catch (e) {
       status.textContent = e.message || 'Something went wrong.';
       status.classList.add('error');
@@ -647,6 +661,18 @@
       this.value = '';
     });
     $('#logo-remove').addEventListener('click', function () { doc.from.logo = ''; renderLogo(); changed(); });
+
+    // Signature (stored with the business profile, like the logo)
+    $('#signature-upload').addEventListener('click', function () { $('#signature-file').click(); });
+    $('#signature-file').addEventListener('change', function () {
+      const file = this.files[0]; if (!file) return;
+      if (file.size > 1.5 * 1024 * 1024) { toast('Signature too large. Keep it under 1.5 MB', 3000); return; }
+      const reader = new FileReader();
+      reader.onload = function () { doc.from.signature = reader.result; renderSignature(); changed(); };
+      reader.readAsDataURL(file);
+      this.value = '';
+    });
+    $('#signature-remove').addEventListener('click', function () { doc.from.signature = ''; renderSignature(); changed(); });
 
     // Profiles
     $('#profile-select').addEventListener('change', function () { applyProfile(currentProfile()); renderAll(); changed(); });

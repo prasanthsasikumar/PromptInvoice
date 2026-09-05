@@ -4,6 +4,8 @@ import { spawn } from 'node:child_process';
 import { test, after, before } from 'node:test';
 import assert from 'node:assert/strict';
 import path from 'node:path';
+import fs from 'node:fs';
+import os from 'node:os';
 import { fileURLToPath } from 'node:url';
 
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
@@ -94,13 +96,50 @@ test('discount, shipping and currency change flow through', async () => {
   await evalJs(setField('#currency-select', 'USD'));
 });
 
-test('document type switches labels; receipt shows PAID', async () => {
+test('document type switches labels; receipt shows PAID; AI button follows the type', async () => {
+  assert.equal(await evalJs(`document.querySelector('#ai-generate').textContent`), 'Generate invoice');
   await evalJs(`document.querySelector('#doc-type [data-doctype=quote]').click(); true`);
   assert.equal(await evalJs(`document.querySelector('#paper .p-title').textContent`), 'QUOTE');
   assert.equal(await evalJs(`document.querySelector('#due-label').textContent`), 'Valid until');
+  assert.equal(await evalJs(`document.querySelector('#ai-generate').textContent`), 'Generate quote');
   await evalJs(`document.querySelector('#doc-type [data-doctype=receipt]').click(); true`);
   assert.equal(await evalJs(`!!document.querySelector('#paper .p-paid')`), true);
+  await evalJs(`document.querySelector('#doc-type [data-doctype=voucher]').click(); true`);
+  assert.equal(await evalJs(`document.querySelector('#ai-generate').textContent`), 'Generate voucher');
   await evalJs(`document.querySelector('#doc-type [data-doctype=invoice]').click(); true`);
+  assert.equal(await evalJs(`document.querySelector('#ai-generate').textContent`), 'Generate invoice');
+});
+
+test('signature upload is stored with the business and printed on the documents', async () => {
+  // 1x1 transparent PNG written to a temp file and fed to the hidden file input over the DevTools protocol.
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+  const file = path.join(os.tmpdir(), 'pi-signature-test.png');
+  fs.writeFileSync(file, png);
+  await send('DOM.enable');
+  const { root } = await send('DOM.getDocument');
+  const { nodeId } = await send('DOM.querySelector', { nodeId: root.nodeId, selector: '#signature-file' });
+  await send('DOM.setFileInputFiles', { nodeId, files: [file] });
+  await evalJs(`document.querySelector('#signature-file').dispatchEvent(new Event('change', {bubbles:true})); true`);
+  await sleep(300);
+  assert.equal(await evalJs(`document.querySelector('#signature-thumb').hidden`), false);
+  assert.equal(await evalJs(`document.querySelector('#signature-thumb').src.startsWith('data:image/png;base64,')`), true);
+  // invoice: an authorised signature block at the bottom
+  assert.equal(await evalJs(`document.querySelector('#paper .p-sign.single .p-sign-role').textContent`), 'Authorised signature');
+  assert.equal(await evalJs(`!!document.querySelector('#paper .p-sign.single .p-sig')`), true);
+  // voucher: the image sits on the "Approved by" line only
+  await evalJs(`document.querySelector('#doc-type [data-doctype=voucher]').click(); true`);
+  assert.equal(await evalJs(`document.querySelectorAll('#paper .p-sign .p-sig').length`), 1);
+  assert.equal(await evalJs(`document.querySelector('#paper .p-sign > div:first-child .p-sign-role').textContent`), 'Approved by');
+  assert.equal(await evalJs(`!!document.querySelector('#paper .p-sign > div:first-child .p-sig')`), true);
+  await evalJs(`document.querySelector('#doc-type [data-doctype=invoice]').click(); true`);
+  // saved with the business, and cleared by Remove
+  await evalJs(`document.querySelector('#profile-save').click(); true`);
+  assert.equal(await evalJs(`Store.profiles()[0].signature.startsWith('data:image/png')`), true);
+  await evalJs(`document.querySelector('#signature-remove').click(); true`);
+  assert.equal(await evalJs(`document.querySelector('#signature-thumb').hidden`), true);
+  assert.equal(await evalJs(`!!document.querySelector('#paper .p-sign')`), false);
+  await evalJs(`document.querySelector('#profile-save').click(); true`);
+  assert.equal(await evalJs(`Store.profiles()[0].signature`), '');
 });
 
 test('payment voucher: pay-to, numbered lines, total payable, signatures; no due date', async () => {
