@@ -1,0 +1,10 @@
+{
+  "cleanUrls": true,
+  "functions": {
+    "api/pdf.js": {
+      "memory": 1769,
+      "maxDuration": 30,
+      "includeFiles": "{index.html,css/**,js/**}"
+    }
+  }
+}
