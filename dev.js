@@ -7,7 +7,7 @@ const path = require('node:path');
 
 const ROOT = __dirname;
 const PORT = process.env.PORT || 8080;
-const TYPES = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
+const TYPES = { '.txt': 'text/plain', '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.png': 'image/png', '.svg': 'image/svg+xml', '.ico': 'image/x-icon' };
 
 try {
   for (const line of fs.readFileSync(path.join(ROOT, '.env.local'), 'utf8').split('\n')) {
@@ -31,11 +31,13 @@ http.createServer(async (req, res) => {
     if (!fs.existsSync(file)) { res.writeHead(404); return res.end('no such function'); }
     req.body = await readBody(req);
     res.status = (c) => { res.statusCode = c; return res; };
+    if (!res.send) res.send = (b) => res.end(b);
     res.json = (b) => { res.setHeader('Content-Type', 'application/json'); res.end(JSON.stringify(b)); return res; };
     try { await require(file)(req, res); } catch (e) { console.error(e); res.status(500).json({ error: 'function crashed' }); }
     return;
   }
   let file = path.join(ROOT, url.pathname === '/' ? 'index.html' : url.pathname);
+  if (!path.extname(file) && fs.existsSync(file + '.html')) file += '.html';  // cleanUrls, as on Vercel
   if (!file.startsWith(ROOT) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); return res.end('not found'); }
   res.setHeader('Content-Type', TYPES[path.extname(file)] || 'application/octet-stream');
   fs.createReadStream(file).pipe(res);

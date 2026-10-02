@@ -1,0 +1,25 @@
+# PromptInvoice
+
+> Free invoice, quote, estimate, receipt and payment voucher generator. Agents can create a finished PDF with one
+> HTTP request: POST https://invoice.flowsxr.com/api/pdf with the document as JSON, receive application/pdf.
+> No account or key. Nothing is stored. Totals are calculated for you.
+
+## For agents
+
+- [Agent guide](https://invoice.flowsxr.com/agents): every field, document types, examples, errors, rules for agents working for a person
+- [Machine-readable usage](https://invoice.flowsxr.com/api/pdf): GET returns the fields, limits and an example as JSON
+
+## Minimal request
+
+POST https://invoice.flowsxr.com/api/pdf
+Content-Type: application/json
+
+{"number": "INV-0042", "from": {"name": "Studio Nova Ltd"}, "to": {"name": "Acme Corp"},
+ "items": [{"description": "Prototype development", "qty": 24, "rate": 120}], "currency": "NZD"}
+
+Use "docType": "voucher" when the business is paying someone. Errors come back as 400 with a list of { field, message }.
+
+## Optional
+
+- [Generator for people](https://invoice.flowsxr.com/)
+- [Source code (MIT)](https://github.com/prasanthsasikumar/PromptInvoice)

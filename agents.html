@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PromptInvoice for Agents</title>
+<meta name="description" content="How AI agents create invoices, quotes, receipts and payment vouchers as PDFs with one API call to PromptInvoice.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23166534'/%3E%3Cpath d='M9 8h14v16H9z' fill='none' stroke='%23fff' stroke-width='2'/%3E%3Cpath d='M12 13h8M12 17h8M12 21h5' stroke='%23fff' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E">
+<style>
+  :root {
+    --accent: #166534; --accent-soft: #f0fdf4; --ink: #1d1d1f; --subtle: #5b6270; --hairline: #e5e7eb; --fog: #f6f7f8;
+    --code-bg: #0f172a; --code-ink: #e2e8f0; --warn-bg: #fffbeb; --warn-line: #f59e0b;
+    --sans: -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: #fff; color: var(--ink); font-family: var(--sans); font-size: 16px; line-height: 1.6; }
+  .wrap { max-width: 860px; margin: 0 auto; padding: 40px 20px 80px; }
+  header.top { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 36px; }
+  .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 700; color: var(--ink); text-decoration: none; }
+  .mark { width: 26px; height: 26px; border-radius: 7px; background: var(--accent); }
+  h1 { font-size: 34px; line-height: 1.15; letter-spacing: -.02em; margin: 0 0 12px; text-wrap: balance; }
+  h2 { font-size: 22px; letter-spacing: -.01em; margin: 44px 0 10px; padding-top: 8px; border-top: 1px solid var(--hairline); }
+  h3 { font-size: 16px; margin: 24px 0 6px; }
+  p, li { max-width: 68ch; }
+  .lede { font-size: 18px; color: var(--subtle); }
+  a { color: var(--accent); }
+  code { font-family: var(--mono); font-size: .9em; background: var(--fog); padding: 1px 5px; border-radius: 4px; }
+  pre { background: var(--code-bg); color: var(--code-ink); padding: 16px 18px; border-radius: 10px; overflow-x: auto; font-size: 13.5px; line-height: 1.55; }
+  pre code { background: none; padding: 0; color: inherit; }
+  .card { background: var(--accent-soft); border: 1px solid #bbf7d0; border-radius: 12px; padding: 16px 20px; }
+  .note { background: var(--warn-bg); border-left: 3px solid var(--warn-line); padding: 12px 16px; border-radius: 6px; }
+  .table-wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: 14.5px; }
+  th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--hairline); }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--subtle); }
+  td code { white-space: nowrap; }
+  ol.rules li { margin-bottom: 6px; }
+  nav.toc { columns: 2; font-size: 15px; margin: 18px 0 0; }
+  nav.toc a { display: block; text-decoration: none; padding: 2px 0; }
+  @media (max-width: 560px) { nav.toc { columns: 1; } h1 { font-size: 28px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <a class="brand" href="/"><span class="mark" aria-hidden="true"></span>PromptInvoice</a>
+    <a href="/">Open the generator</a>
+  </header>
+
+  <h1>PromptInvoice for agents</h1>
+  <p class="lede">An AI agent can make an invoice, quote, estimate, receipt or payment voucher as a finished PDF with one HTTP request.
+    The PDF is identical to the one the Download PDF button produces. No account, no key, nothing stored.</p>
+
+  <div class="card">
+    <strong>The whole API in one line:</strong> <code>POST https://invoice.flowsxr.com/api/pdf</code> with the document as JSON.
+    You get <code>application/pdf</code> back. Send <code>GET</code> to the same URL for a machine-readable version of this page.
+  </div>
+
+  <nav class="toc" aria-label="On this page">
+    <a href="#quick-start">Quick start</a>
+    <a href="#types">Choosing the document type</a>
+    <a href="#fields">Every field</a>
+    <a href="#examples">Examples</a>
+    <a href="#images">Logo and signature</a>
+    <a href="#responses">Responses and errors</a>
+    <a href="#rules">Rules for agents</a>
+    <a href="#limits">Limits and privacy</a>
+  </nav>
+
+  <h2 id="quick-start">Quick start</h2>
+  <pre><code>curl -sS https://invoice.flowsxr.com/api/pdf \
+  -H 'Content-Type: application/json' \
+  -o invoice.pdf \
+  -d '{
+    "number": "INV-0042",
+    "from": { "name": "Studio Nova Ltd", "email": "billing@studionova.com" },
+    "to":   { "name": "Acme Corp", "email": "ap@acme.com" },
+    "items": [ { "description": "Prototype development", "qty": 24, "rate": 120 } ],
+    "currency": "NZD", "taxRate": 15, "taxLabel": "GST"
+  }'</code></pre>
+
+  <h3>Python</h3>
+  <pre><code>import requests
+
+doc = {"number": "INV-0042", "from": {"name": "Studio Nova Ltd"}, "to": {"name": "Acme Corp"},
+       "items": [{"description": "Prototype development", "qty": 24, "rate": 120}], "currency": "NZD"}
+r = requests.post("https://invoice.flowsxr.com/api/pdf", json=doc, timeout=60)
+if r.status_code == 400:
+    print(r.json()["details"])          # [{"field": "...", "message": "..."}]: fix and resend
+r.raise_for_status()
+open("INV-0042.pdf", "wb").write(r.content)</code></pre>
+
+  <h3>JavaScript</h3>
+  <pre><code>const r = await fetch('https://invoice.flowsxr.com/api/pdf', {
+  method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(doc),
+});
+if (!r.ok) throw new Error(JSON.stringify(await r.json()));
+const pdf = new Uint8Array(await r.arrayBuffer());</code></pre>
+
+  <h2 id="types">Choosing the document type</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th><code>docType</code></th><th>Use it when</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td><code>invoice</code></td><td>Asking a client to pay for work or goods</td><td>Default. Due date defaults to 14 days after the issue date.</td></tr>
+      <tr><td><code>quote</code> / <code>estimate</code></td><td>Proposing a price before work starts</td><td><code>dueDate</code> is printed as "Valid until".</td></tr>
+      <tr><td><code>receipt</code></td><td>Confirming a payment you received</td><td><code>dueDate</code> is printed as "Paid on"; the PDF shows PAID.</td></tr>
+      <tr><td><code>voucher</code></td><td>Recording money you paid out (a contractor, staff, a supplier)</td><td>"Pay to" replaces "Bill to"; adds Approved by / Received by signature lines; no due date; no default note.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="fields">Every field</h2>
+  <p>Only <code>number</code>, <code>from.name</code>, <code>to.name</code> and at least one item are required. Everything else has a sensible default.
+    Unknown fields are ignored and reported back as warnings.</p>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Field</th><th>Type</th><th>Default</th><th>Meaning</th></tr></thead>
+    <tbody>
+      <tr><td><code>docType</code></td><td>text</td><td>invoice</td><td>invoice, quote, estimate, receipt or voucher</td></tr>
+      <tr><td><code>number</code></td><td>text, required</td><td></td><td>Your document number, e.g. INV-0042, PV-2026-014. PromptInvoice does not number API documents for you.</td></tr>
+      <tr><td><code>issueDate</code></td><td>YYYY-MM-DD</td><td>today (UTC)</td><td>Issue date; for vouchers, the voucher date</td></tr>
+      <tr><td><code>dueDate</code></td><td>YYYY-MM-DD</td><td>issue + 14 days</td><td>Due, valid-until or paid-on date (ignored for vouchers)</td></tr>
+      <tr><td><code>from</code></td><td>object</td><td></td><td>Your business: <code>name</code> (required), <code>email</code>, <code>phone</code>, <code>address</code> (use \n for new lines), <code>taxId</code>, <code>logo</code>, <code>signature</code></td></tr>
+      <tr><td><code>to</code></td><td>object</td><td></td><td>The client or payee: <code>name</code> (required), <code>email</code>, <code>address</code>, <code>reference</code> (PO or project ref)</td></tr>
+      <tr><td><code>items</code></td><td>list</td><td></td><td>1 to 200 lines of <code>{ "description", "qty", "rate" }</code>. <code>rate</code> is the unit price; <code>qty</code> defaults to 1 and may be hours (16.48).</td></tr>
+      <tr><td><code>currency</code></td><td>ISO 4217</td><td>USD</td><td>150+ codes, e.g. USD, SGD, NZD, EUR, GBP, INR, LKR. Sets the symbol and formatting.</td></tr>
+      <tr><td><code>taxRate</code></td><td>number 0 to 100</td><td>0</td><td>Percent applied after discount</td></tr>
+      <tr><td><code>taxLabel</code></td><td>text</td><td>Tax</td><td>GST, VAT, Sales tax</td></tr>
+      <tr><td><code>discountType</code></td><td>percent or fixed</td><td>percent</td><td>How <code>discountValue</code> is read</td></tr>
+      <tr><td><code>discountValue</code></td><td>number</td><td>0</td><td>Percent (0 to 100) or an amount; capped at the subtotal</td></tr>
+      <tr><td><code>shipping</code></td><td>number</td><td>0</td><td>Added after tax</td></tr>
+      <tr><td><code>customFields</code></td><td>list</td><td>none</td><td>Up to 10 <code>{ "label", "value" }</code> rows shown in the header, e.g. Project, PO number</td></tr>
+      <tr><td><code>paymentDetails</code></td><td>text</td><td>empty</td><td>Bank details or how to pay</td></tr>
+      <tr><td><code>paymentMethod</code></td><td>text</td><td>empty</td><td>Vouchers: Bank transfer, Cash, PayNow, Cheque</td></tr>
+      <tr><td><code>approvedBy</code></td><td>text</td><td>empty</td><td>Vouchers: name printed under the Approved by signature</td></tr>
+      <tr><td><code>notes</code></td><td>text</td><td>a thank-you line (none for vouchers)</td><td>Footer text; send <code>""</code> for none</td></tr>
+      <tr><td><code>theme</code></td><td>#rrggbb</td><td>#166534</td><td>Accent colour</td></tr>
+      <tr><td><code>layout</code></td><td>stacked or side</td><td>stacked</td><td><code>side</code> places From and To side by side</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Never send totals. Subtotal, discount, tax and total are always calculated from the items, exactly as the app does,
+    so the PDF always adds up. A <code>total</code> field is ignored with a warning.</p>
+
+  <h2 id="examples">Examples</h2>
+  <h3>Payment voucher (paying a contractor)</h3>
+  <pre><code>{
+  "docType": "voucher",
+  "number": "PV-2026-014",
+  "issueDate": "2026-10-02",
+  "from": { "name": "Studio Nova Ltd", "email": "billing@studionova.com", "address": "12 Example Street\nAuckland 1010" },
+  "to": { "name": "Jane Contractor", "email": "jane@example.com" },
+  "items": [
+    { "description": "Design services, September 2026", "qty": 1, "rate": 350 },
+    { "description": "Advance for October 2026 (deducted from the October payment)", "qty": 1, "rate": 200 }
+  ],
+  "currency": "SGD",
+  "paymentMethod": "Bank transfer",
+  "approvedBy": "Alex Owner"
+}</code></pre>
+  <h3>Invoice with tax, discount and bank details</h3>
+  <pre><code>{
+  "number": "INV-0042",
+  "issueDate": "2026-10-02",
+  "dueDate": "2026-10-16",
+  "from": { "name": "Studio Nova Ltd", "taxId": "123-456-789", "address": "12 Example Street\nAuckland 1010" },
+  "to": { "name": "Acme Corp", "email": "ap@acme.com", "reference": "PO-2026-014" },
+  "items": [
+    { "description": "Mixed-reality prototype: Unity development", "qty": 24, "rate": 120 },
+    { "description": "On-site user testing session", "qty": 2, "rate": 450 }
+  ],
+  "currency": "NZD", "taxRate": 15, "taxLabel": "GST",
+  "discountType": "percent", "discountValue": 5,
+  "customFields": [ { "label": "Project", "value": "September prototype" } ],
+  "paymentDetails": "Bank: Example Bank\nAccount: 01-0000-0000000-00\nReference: INV-0042"
+}</code></pre>
+
+  <h2 id="images">Logo and signature</h2>
+  <p>Send images inline as base64 data URIs (PNG, JPEG, WebP or SVG, up to 1 MB each). Links to images are not fetched.
+    The signature is printed above "Approved by" on vouchers and as the authorised signature on other documents.</p>
+  <pre><code>import base64
+logo = "data:image/png;base64," + base64.b64encode(open("logo.png", "rb").read()).decode()
+doc["from"]["logo"] = logo</code></pre>
+
+  <h2 id="responses">Responses and errors</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Status</th><th>Body</th><th>What to do</th></tr></thead>
+    <tbody>
+      <tr><td><code>200</code></td><td>The PDF. <code>Content-Disposition</code> carries a filename like <code>INV-0042 - Acme Corp.pdf</code></td><td>Save it. If <code>X-PromptInvoice-Warnings</code> is present, it lists ignored fields.</td></tr>
+      <tr><td><code>400</code></td><td><code>{ "error", "details": [{ "field", "message" }], "warnings" }</code></td><td>Every problem is listed at once. Fix those fields and resend.</td></tr>
+      <tr><td><code>413</code></td><td><code>{ "error" }</code></td><td>Body over 4 MB: shrink the logo or signature.</td></tr>
+      <tr><td><code>500</code></td><td><code>{ "error", "message" }</code></td><td>Rendering failed. Retry once after a few seconds.</td></tr>
+    </tbody>
+  </table></div>
+  <pre><code>{
+  "error": "The document has problems. Fix the fields listed and send it again.",
+  "details": [
+    { "field": "number", "message": "is required" },
+    { "field": "items[0].rate", "message": "must be a number (the unit price)" }
+  ]
+}</code></pre>
+  <p>The first request after a quiet period can take a few seconds while the renderer starts. Later ones take about a second.</p>
+
+  <h2 id="rules">Rules for agents working for a person</h2>
+  <ol class="rules">
+    <li><strong>Use only figures the person gave you</strong> or that come from their records. Never invent rates, hours, tax rates or bank details.</li>
+    <li><strong>Pick the right type.</strong> Money coming in is an invoice (or a receipt once paid). Money going out is a voucher.</li>
+    <li><strong>Show a summary before you generate:</strong> type, number, payee or client, each line, currency and the total you expect. Generate after they confirm.</li>
+    <li><strong>Keep numbering consistent</strong> with the person's existing documents (ask for the last number if you do not know it).</li>
+    <li><strong>Dates are YYYY-MM-DD.</strong> If the person says "today", use their local date, not yours.</li>
+    <li><strong>Hand back the file,</strong> named as the <code>Content-Disposition</code> suggests, and say where you saved it. Sending it to anyone is the person's decision.</li>
+    <li><strong>The API does not save anything.</strong> If the person wants the document in their PromptInvoice history, they can recreate it in the generator at <a href="/">invoice.flowsxr.com</a> and press Save.</li>
+  </ol>
+
+  <h2 id="limits">Limits and privacy</h2>
+  <ul>
+    <li>Body up to 4 MB, up to 200 line items, up to 10 custom fields, images up to 1 MB each.</li>
+    <li>Nothing is stored or logged beyond standard request logs. The document is rendered and discarded.</li>
+    <li>While rendering, the page cannot reach any other website, so content in your document cannot load remote resources.</li>
+    <li>Free to use. Please keep automated volume reasonable.</li>
+    <li>Machine-readable summary: <a href="/api/pdf"><code>GET /api/pdf</code></a>. Short pointer for LLM crawlers: <a href="/llms.txt"><code>/llms.txt</code></a>.</li>
+    <li>Source and self-hosting: <a href="https://github.com/prasanthsasikumar/PromptInvoice">github.com/prasanthsasikumar/PromptInvoice</a> (MIT).</li>
+  </ul>
+</div>
+</body>
+</html>
