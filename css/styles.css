@@ -299,6 +299,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
 /* Print: only the invoice paper, A4 */
 @page { size: A4; margin: 16mm 16mm 18mm; }   /* page margins, so every printed page gets them, not just the first */
 @media print {
+  .p-hint { display: none; }
   body { background: #fff; }
   body > *:not(main) { display: none !important; }
   main > *:not(.generate) { display: none !important; }

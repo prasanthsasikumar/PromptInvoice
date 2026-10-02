@@ -256,7 +256,7 @@
     const signature = doc.from.signature ? '<img class="p-sig" src="' + esc(doc.from.signature) + '" alt="Signature">' : '';
     const logo = doc.from.logo ? '<img class="p-logo" src="' + esc(doc.from.logo) + '" alt="">' : '';
     const fromBlock = '<div class="p-name">' + (esc(doc.from.name) || 'Your Company') + '</div>' +
-      '<div class="p-meta">' + (esc(fromMeta) || 'Your address\nyou@example.com') + '</div>';
+      '<div class="p-meta">' + (esc(fromMeta) || '<span class="p-hint">Your address\nyou@example.com</span>') + '</div>';
     const toBlock = '<div class="p-label">' + (L.to || 'Billed to') + '</div>' +
       '<div class="p-client">' + (esc(doc.to.name) || (voucher ? 'Payee name' : 'Client Name')) + '</div>' +
       '<div class="p-meta">' + (esc([doc.to.address, doc.to.email].filter(Boolean).join('\n')) || (voucher ? 'Payee address' : 'Client address')) + '</div>' +
@@ -267,7 +267,7 @@
       ? '<div class="p-head side"><div class="p-from">' + logo + '</div>' + titleBlock + '</div>' +
         '<div class="p-parties">' +
           '<div class="p-party"><div class="p-label">From</div><div class="p-client">' + (esc(doc.from.name) || 'Your Company') + '</div>' +
-            '<div class="p-meta">' + (esc(fromMeta) || 'Your address\nyou@example.com') + '</div></div>' +
+            '<div class="p-meta">' + (esc(fromMeta) || '<span class="p-hint">Your address\nyou@example.com</span>') + '</div></div>' +
           '<div class="p-party">' + toBlock + '</div>' +
         '</div>'
       : '<div class="p-head"><div class="p-from">' + logo + fromBlock + '</div>' + titleBlock + '</div>' +

@@ -45,3 +45,11 @@ test('renders an invoice with tax and escapes markup in text', { timeout: 60000 
   assert.ok(text.includes('INV-<b>9</b>'), text);
   assert.ok(text.includes('1,150.00'), text);
 });
+
+test('a business with no contact details does not print the placeholder hint', { timeout: 60000 }, async () => {
+  const { doc } = normalize({ number: 'INV-1', from: { name: 'Bare Co' }, to: { name: 'Acme' }, items: [{ description: 'x', rate: 1 }] });
+  const text = pdfText(await render(doc));
+  assert.ok(text.includes('Bare Co'));
+  assert.ok(!text.includes('you@example.com'), text);
+  assert.ok(!text.includes('Your address'), text);
+});
