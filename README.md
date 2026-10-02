@@ -5,11 +5,11 @@ Free invoice and payment voucher generator. Live at **https://invoice.flowsxr.co
 I run a small company and didn't want to pay for invoicing software just to send a few invoices and pay a few contractors, so I built this for myself. A few friends use it now too. Feel free to use it.
 
 <p align="center">
-  <a href="https://github.com/prasanthsasikumar/PromptInvoice/blob/main/docs/media/promptinvoice-for-agents.mp4">
+  <a href="https://youtu.be/R34zNL89hIw">
     <img src="docs/media/agent-to-pdf.gif" alt="An agent posts a payment voucher as JSON and gets the finished PDF back" width="720">
   </a>
   <br>
-  <sub><a href="https://github.com/prasanthsasikumar/PromptInvoice/blob/main/docs/media/promptinvoice-for-agents.mp4">Watch the 29-second demo with sound</a></sub>
+  <sub><a href="https://youtu.be/R34zNL89hIw">Watch the 29-second demo on YouTube</a></sub>
 </p>
 
 <p align="center">
