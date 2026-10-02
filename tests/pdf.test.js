@@ -83,3 +83,17 @@ test('CORS preflight and other methods', async () => {
   await handler(req('PUT'), put);
   assert.equal(put.statusCode, 405);
 });
+
+test('each POST records one anonymous usage event (ok and invalid)', async () => {
+  const seen = [];
+  handler.setTracker(async (req, name, params) => { seen.push([name, params]); });
+  handler.setRenderer(async () => Buffer.from('%PDF'));
+  await handler(req('POST', DOC), fakeRes());
+  await handler(req('POST', { items: [] }), fakeRes());
+  assert.deepEqual(seen.map((s) => s[1].status), ['ok', 'invalid']);
+  assert.equal(seen[0][0], 'api_pdf');
+  assert.equal(seen[0][1].doc_type, 'voucher');
+  assert.equal(seen[0][1].currency, 'SGD');
+  assert.equal(JSON.stringify(seen).includes('Ovindu'), false);
+  handler.setTracker(null);
+});

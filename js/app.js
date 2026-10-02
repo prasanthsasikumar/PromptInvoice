@@ -47,6 +47,8 @@
     return m ? parseInt(m[1], 10) : 0;
   }
 
+  function track(name, params) { if (window.PIAnalytics) window.PIAnalytics.event(name, params); }
+
   /* ---------- document model ---------- */
   function blankItem() { return { description: '', qty: 1, rate: '' }; }
 
@@ -395,6 +397,7 @@
       renderAll();
       changed();
       status.textContent = 'Drafted. Review before sending.';
+      track('ai_draft', { doc_type: doc.docType });
       toast(DOC_LABELS[doc.docType].name.replace(/^./, function (c) { return c.toUpperCase(); }) + ' drafted');
     } catch (e) {
       status.textContent = e.message || 'Something went wrong.';
@@ -440,6 +443,7 @@
     }
     renderSavedList();
     toast('Saved ' + doc.number);
+    track('document_saved', { doc_type: doc.docType, currency: doc.currency });
   }
 
   function loadInvoice(id, duplicate) {
@@ -721,8 +725,8 @@
     });
 
     // Actions
-    $('#download-pdf').addEventListener('click', function () { document.title = doc.number + ' - ' + (doc.to.name || 'invoice'); window.print(); });
-    $('#print').addEventListener('click', function () { document.title = doc.number + ' - ' + (doc.to.name || 'invoice'); window.print(); });
+    $('#download-pdf').addEventListener('click', function () { track('pdf_download', { doc_type: doc.docType, currency: doc.currency }); document.title = doc.number + ' - ' + (doc.to.name || 'invoice'); window.print(); });
+    $('#print').addEventListener('click', function () { track('pdf_print', { doc_type: doc.docType, currency: doc.currency }); document.title = doc.number + ' - ' + (doc.to.name || 'invoice'); window.print(); });
     window.addEventListener('afterprint', function () { document.title = 'PromptInvoice: Free Invoice Generator'; });
     $('#save-invoice').addEventListener('click', saveInvoice);
     $('#new-invoice').addEventListener('click', startNew);

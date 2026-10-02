@@ -213,12 +213,14 @@ doc["from"]["logo"] = logo</code></pre>
   <h2 id="limits">Limits and privacy</h2>
   <ul>
     <li>Body up to 4 MB, up to 200 line items, up to 10 custom fields, images up to 1 MB each.</li>
-    <li>Nothing is stored or logged beyond standard request logs. The document is rendered and discarded.</li>
+    <li>Nothing is stored. The document is rendered and discarded. Each request records one anonymous usage event (status, document type, currency, number of lines, caller type such as curl or Python, and approximate location from the IP: country, region, city) in Google Analytics. Never names, amounts or any document text.</li>
     <li>While rendering, the page cannot reach any other website, so content in your document cannot load remote resources.</li>
     <li>Free to use. Please keep automated volume reasonable.</li>
     <li>Machine-readable summary: <a href="/api/pdf"><code>GET /api/pdf</code></a>. Short pointer for LLM crawlers: <a href="/llms.txt"><code>/llms.txt</code></a>.</li>
     <li>Source and self-hosting: <a href="https://github.com/prasanthsasikumar/PromptInvoice">github.com/prasanthsasikumar/PromptInvoice</a> (MIT).</li>
   </ul>
 </div>
+<script src="js/config.js"></script>
+<script src="js/analytics.js"></script>
 </body>
 </html>

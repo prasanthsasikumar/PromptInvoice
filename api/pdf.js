@@ -3,10 +3,13 @@
 'use strict';
 
 const { normalize, LIMITS, TYPES } = require('./_lib/document.js');
+const analytics = require('./_lib/analytics.js');
 
 const DOCS = 'https://invoice.flowsxr.com/agents';
 const MAX_BODY = 4 * 1024 * 1024;
 let renderer = null;
+let tracker = null;
+const track = (req, params) => (tracker || analytics.track)(req, 'api_pdf', params);
 
 const EXAMPLE = {
   docType: 'voucher',
@@ -75,11 +78,15 @@ async function handler(req, res) {
 
   const { doc, errors, warnings } = normalize(body);
   if (warnings.length) res.setHeader('X-PromptInvoice-Warnings', JSON.stringify(warnings));
-  if (errors.length) return res.status(400).json({ error: 'The document has problems. Fix the fields listed and send it again.', details: errors, warnings: warnings, help: DOCS });
+  if (errors.length) {
+    await track(req, { status: 'invalid', error_count: errors.length });
+    return res.status(400).json({ error: 'The document has problems. Fix the fields listed and send it again.', details: errors, warnings: warnings, help: DOCS });
+  }
 
   try {
     const render = renderer || require('./_lib/render.js').render;
     const pdf = await render(doc);
+    await track(req, { status: 'ok', doc_type: doc.docType, currency: doc.currency, line_count: doc.items.length });
     res.status(200);
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', 'inline; filename="' + filename(doc) + '"');
@@ -87,10 +94,12 @@ async function handler(req, res) {
     return res.end(pdf);
   } catch (e) {
     console.error('pdf render failed', e);
+    await track(req, { status: 'error', doc_type: doc.docType });
     return res.status(500).json({ error: 'Could not render the PDF. Try again; if it keeps failing, report it.', message: String(e.message || e).slice(0, 300), help: DOCS });
   }
 }
 
 module.exports = handler;
 module.exports.setRenderer = function (fn) { renderer = fn; };
+module.exports.setTracker = function (fn) { tracker = fn; };
 module.exports.config = { api: { bodyParser: { sizeLimit: '4.5mb' } } };
