@@ -5,6 +5,6 @@
 window.PI_CONFIG = {
   supabaseUrl: 'https://db.flowsxr.com',
   // Google Analytics 4 Measurement ID (G-XXXXXXX). Empty = no analytics.
-  gaMeasurementId: '',
+  gaMeasurementId: 'G-CG1WN8MEGX',
   supabaseAnonKey: 'sb_publishable_cIcL2b5Iv0LkgpKSzUSi2e_wDtupc3b',
 };
