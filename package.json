@@ -6,8 +6,8 @@
   "scripts": {
     "start": "node dev.js",
     "test": "node --test tests/calc.test.js tests/api.test.js tests/document.test.js tests/pdf.test.js",
-    "test:browser": "node --test tests/browser.test.mjs tests/pdf.browser.test.mjs",
-    "test:all": "node --test tests/calc.test.js tests/api.test.js tests/document.test.js tests/pdf.test.js tests/browser.test.mjs tests/pdf.browser.test.mjs",
+    "test:browser": "node --no-experimental-require-module --test tests/browser.test.mjs tests/pdf.browser.test.mjs",
+    "test:all": "node --no-experimental-require-module --test tests/calc.test.js tests/api.test.js tests/document.test.js tests/pdf.test.js tests/browser.test.mjs tests/pdf.browser.test.mjs",
     "screenshots": "node tests/screenshots.mjs"
   },
   "license": "MIT",

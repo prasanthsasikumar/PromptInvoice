@@ -15,18 +15,21 @@ const LOCAL_CONFIG = 'window.PI_CONFIG = { supabaseUrl: "", supabaseAnonKey: "" 
 
 let browserPromise = null;
 
-function launch() {
-  const puppeteer = require('puppeteer-core');
+// Both packages are ES modules: load them with import(), which works in every Node version Vercel runs.
+const load = (name) => import(name).then((m) => m.default || m);
+
+async function launch() {
+  const puppeteer = await load('puppeteer-core');
   if (process.env.CHROME) {
     return puppeteer.launch({ executablePath: process.env.CHROME, headless: true, args: ['--no-sandbox', '--disable-gpu'] });
   }
-  const chromium = require('@sparticuz/chromium');
+  const chromium = await load('@sparticuz/chromium');
   chromium.setGraphicsMode = false;
-  return chromium.executablePath().then(async (executablePath) => puppeteer.launch({
+  return puppeteer.launch({
     args: await puppeteer.defaultArgs({ args: chromium.args, headless: 'shell' }),
-    executablePath: executablePath,
+    executablePath: await chromium.executablePath(),
     headless: 'shell',
-  }));
+  });
 }
 
 async function browser() {
