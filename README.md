@@ -28,6 +28,19 @@ If you have feedback, email me at **prasanth@flowsxr.com** or open an [issue](ht
 
 Any agent (Claude, ChatGPT, a script) can create an invoice, quote, estimate, receipt or payment voucher as a finished PDF. No account, no key, nothing stored. The PDF is identical to what the Download PDF button gives you.
 
+<p align="center">
+  <a href="https://github.com/prasanthsasikumar/PromptInvoice/blob/main/docs/media/promptinvoice-for-agents.mp4">
+    <img src="docs/media/agent-to-pdf.gif" alt="An agent posts a payment voucher as JSON and gets the finished PDF back" width="720">
+  </a>
+  <br>
+  <sub><a href="https://github.com/prasanthsasikumar/PromptInvoice/blob/main/docs/media/promptinvoice-for-agents.mp4">Watch the 29-second demo with sound</a></sub>
+</p>
+
+<p align="center">
+  <img src="docs/media/five-documents.gif" alt="Invoice, quote, estimate, receipt and payment voucher, all from the same API" width="400">
+  <img src="docs/media/agents-page.gif" alt="The agent guide at invoice.flowsxr.com/agents" width="400">
+</p>
+
 ```bash
 curl -sS https://invoice.flowsxr.com/api/pdf -H 'Content-Type: application/json' -o voucher.pdf -d '{
   "docType": "voucher", "number": "PV-2026-014",
