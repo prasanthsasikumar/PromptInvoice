@@ -192,6 +192,22 @@ test('item descriptions keep line breaks; a custom colour sets the theme', async
   assert.equal(await evalJs(`document.querySelectorAll('#themes button.active').length`), 0);
 });
 
+test('signed in: a full invoice still prints on one page (A4 and Letter)', async () => {
+  await evalJs(`document.body.classList.add('signed-in'); true`);
+  for (let i = 0; i < 5; i++) {
+    if (i) await evalJs(`document.querySelector('#item-add').click(); true`);
+    await evalJs(setField(`#items .item-row:nth-child(${i + 1}) [data-f=description]`, 'Module ' + i + '\nA two line description of the work delivered in this module for the client'));
+    await evalJs(setField(`#items .item-row:nth-child(${i + 1}) input[data-f=rate]`, '1000'));
+  }
+  await evalJs(setField('[data-bind="paymentDetails"]', 'Account Name: Example\nUEN: 1\nAccount Number: 2\nBank: Example Bank\nSwift Code: EXAMPLE'));
+  for (const size of [{}, { paperWidth: 8.5, paperHeight: 11 }]) {
+    const { data } = await send('Page.printToPDF', { preferCSSPageSize: !size.paperWidth, ...size });
+    const pages = (Buffer.from(data, 'base64').toString('latin1').match(/\/Type\s*\/Page[^s]/g) || []).length;
+    assert.equal(pages, 1, 'printed on ' + pages + ' pages with ' + JSON.stringify(size));
+  }
+  await evalJs(`document.body.classList.remove('signed-in'); for (let i = 0; i < 4; i++) document.querySelector('#items .item-row:last-child .remove').click(); true`);
+});
+
 test('parties can be laid out side by side', async () => {
   await evalJs(`document.querySelector('#doc-type [data-doctype=voucher]').click(); true`);
   assert.equal(await evalJs(`!!document.querySelector('#paper .p-billto')`), true);

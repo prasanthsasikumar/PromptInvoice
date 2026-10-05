@@ -306,7 +306,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
   body { background: #fff; }
   body > *:not(main) { display: none !important; }
   main > *:not(.generate) { display: none !important; }
-  .generate { padding: 0; background: #fff; }
+  .generate, body.signed-in .generate { padding: 0; background: #fff; }
   .generate > .container > h2, .generate > .container > .section-sub, .workspace-note { display: none !important; }
   .generate .container { max-width: none; padding: 0; }
   .generator { display: block; margin: 0; }
@@ -314,7 +314,7 @@ input[type=number]::-webkit-inner-spin-button { opacity: .4; }
   .preview-col { position: static; }
   .paper-wrap { border: 0; border-radius: 0; box-shadow: none; }
   .paper {
-    width: 178mm; min-height: 262mm; padding: 0; font-size: 11pt;
+    width: 178mm; min-height: 240mm; padding: 0; font-size: 11pt;   /* fits A4 and US Letter (245mm usable) */
     -webkit-print-color-adjust: exact; print-color-adjust: exact;
   }
   .p-name { font-size: 15pt; }
