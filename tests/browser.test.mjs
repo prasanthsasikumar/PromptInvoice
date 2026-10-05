@@ -71,11 +71,11 @@ test('seeds a default business and shows INV-001', async () => {
 });
 
 test('line items and totals update live in the preview', async () => {
-  await evalJs(setField('#items .item-row input[data-f=description]', 'Unity development'));
+  await evalJs(setField('#items .item-row [data-f=description]', 'Unity development'));
   await evalJs(setField('#items .item-row input[data-f=qty]', '24'));
   await evalJs(setField('#items .item-row input[data-f=rate]', '120'));
   await evalJs(`document.querySelector('#item-add').click(); true`);
-  await evalJs(setField('#items .item-row:nth-child(2) input[data-f=description]', 'Quest 3 device'));
+  await evalJs(setField('#items .item-row:nth-child(2) [data-f=description]', 'Quest 3 device'));
   await evalJs(setField('#items .item-row:nth-child(2) input[data-f=rate]', '650'));
   await evalJs(setField('[data-bind="taxRate"]', '15'));
   await evalJs(setField('[data-bind="taxLabel"]', 'GST'));
@@ -182,6 +182,14 @@ test('preview grows to show every item instead of clipping at the first page', a
   assert.equal(await evalJs(`getComputedStyle(document.querySelector('#paper')).overflowY`), 'visible');
   for (let i = 0; i < 16; i++) await evalJs(`document.querySelector('#items .item-row:last-child .remove').click(); true`);
   assert.equal(await evalJs(`document.querySelectorAll('#items .item-row').length`), before);
+});
+
+test('item descriptions keep line breaks; a custom colour sets the theme', async () => {
+  await evalJs(setField('#items .item-row [data-f=description]', 'GKE module\nPrivate cluster with autoscaling'));
+  assert.equal(await evalJs(`document.querySelector('#paper .p-items td.desc').innerText`), 'GKE module\nPrivate cluster with autoscaling');
+  await evalJs(setField('#theme-custom', '#1939f4'));
+  assert.equal(await evalJs(`document.querySelector('#paper').style.getPropertyValue('--theme')`), '#1939f4');
+  assert.equal(await evalJs(`document.querySelectorAll('#themes button.active').length`), 0);
 });
 
 test('parties can be laid out side by side', async () => {

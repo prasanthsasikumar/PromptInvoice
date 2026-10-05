@@ -108,6 +108,7 @@
     });
     $$('#doc-type button').forEach(function (b) { b.classList.toggle('active', b.dataset.doctype === doc.docType); });
     $$('#themes button').forEach(function (b) { b.classList.toggle('active', b.dataset.theme === doc.theme); });
+    $('#theme-custom').value = /^#[0-9a-f]{6}$/i.test(doc.theme || '') ? doc.theme : '#166534';
     const labels = DOC_LABELS[doc.docType];
     const voucher = doc.docType === 'voucher';
     $('#number-label').textContent = labels.number;
@@ -148,7 +149,7 @@
     const totals = Calc.computeTotals(doc);
     wrap.innerHTML = doc.items.map(function (it, i) {
       return '<div class="item-row" data-i="' + i + '">' +
-        '<input type="text" data-f="description" aria-label="Description" placeholder="Description of service or product" value="' + esc(it.description) + '">' +
+        '<textarea data-f="description" rows="1" aria-label="Description" placeholder="Description of service or product">' + esc(it.description) + '</textarea>' +
         '<input type="number" step="any" min="0" data-f="qty" aria-label="Quantity" value="' + esc(it.qty) + '">' +
         '<input type="number" step="any" min="0" data-f="rate" aria-label="Rate" placeholder="0.00" value="' + esc(it.rate) + '">' +
         '<span class="amount">' + esc(Calc.formatMoney(totals.lines[i], doc.currency)) + '</span>' +
@@ -601,6 +602,12 @@
       if (!b) return;
       doc.theme = b.dataset.theme;
       $$('#themes button').forEach(function (x) { x.classList.toggle('active', x === b); });
+      $('#theme-custom').value = doc.theme;
+      changed();
+    });
+    $('#theme-custom').addEventListener('input', function () {
+      doc.theme = this.value;
+      $$('#themes button').forEach(function (x) { x.classList.toggle('active', x.dataset.theme === doc.theme); });
       changed();
     });
 
@@ -610,7 +617,7 @@
       renderItems(); changed();
       const rows = $$('#items .item-row');
       const last = rows[rows.length - 1];
-      if (last) last.querySelector('input').focus();
+      if (last) last.querySelector('[data-f=description]').focus();
     });
     $('#items').addEventListener('input', function (e) {
       const row = e.target.closest('.item-row'); if (!row) return;
