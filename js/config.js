@@ -3,8 +3,8 @@
    supabase/schema.sql in its SQL editor, and paste the project URL and anon key here.
    The anon key is safe to publish; row-level security in the schema protects the data. */
 window.PI_CONFIG = {
-  supabaseUrl: 'https://db.flowsxr.com',
+  supabaseUrl: 'https://gsiqfygqarhlhmekgqfn.supabase.co',
   // Google Analytics 4 Measurement ID (G-XXXXXXX). Empty = no analytics.
   gaMeasurementId: 'G-CG1WN8MEGX',
-  supabaseAnonKey: 'sb_publishable_cIcL2b5Iv0LkgpKSzUSi2e_wDtupc3b',
+  supabaseAnonKey: 'sb_publishable_IdBLbY3mJYJbWD-OF_Bt2w_--5fITk1',
 };
