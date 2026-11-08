@@ -53,7 +53,7 @@ To host your own copy, deploy to Vercel and set `DEEPSEEK_API_KEY` for AI drafti
 
 ## Privacy
 
-Your documents stay in your browser unless you sign in. The PDF API renders and discards each document. Anonymous usage stats (Google Analytics: pages, document type, approximate location) never include names, amounts or document text.
+Your documents stay in your browser unless you sign in. The PDF API renders and discards each document. Anonymous usage stats (Google Analytics and PostHog: pages, document type, approximate location) never include names, amounts or document text. Both run in a cookieless configuration to count visits: no cookies or device storage are used for analytics, and there is no advertising.
 
 ## Feedback
 

@@ -6,5 +6,7 @@ window.PI_CONFIG = {
   supabaseUrl: 'https://gsiqfygqarhlhmekgqfn.supabase.co',
   // Google Analytics 4 Measurement ID (G-XXXXXXX). Empty = no analytics.
   gaMeasurementId: 'G-CG1WN8MEGX',
+  // PostHog project token (public). Empty = no PostHog. Runs cookieless, no person profiles.
+  posthogKey: 'phc_Dpf2jxsea6e9eukisrHaRe5C7gosREy4bvCzzeFriv73',
   supabaseAnonKey: 'sb_publishable_IdBLbY3mJYJbWD-OF_Bt2w_--5fITk1',
 };
